@@ -1,8 +1,8 @@
 namespace GraphQL.Extensions.Pagination {
     public class Slicer {
-        public bool HasNextPage { get; set; }
-        public bool HasPreviousPage { get; set; }
-        public string StartCursor { get; set; }
-        public string EndCursor { get; set; }        
+        public string OrderBy { get; set; }
+        public int? First { get; set; }
+        public string Before { get; set; }
+        public string After { get; set; }
     }
 }

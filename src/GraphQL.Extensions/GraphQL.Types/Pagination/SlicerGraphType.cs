@@ -7,10 +7,10 @@ namespace GraphQL.Types.Pagination {
         public SlicerGraphType() {
 
             Name = "Slicer";
-            Field<NonNullGraphType<BooleanGraphType>>("hasNextPage");
-            Field<NonNullGraphType<BooleanGraphType>>("hasPreviousPage");
-            Field<StringGraphType>("startCursor");
-            Field<StringGraphType>("endCursor");
+            Field<NonNullGraphType<StringGraphType>>("orderBy");
+            Field<IntGraphType>("first");
+            Field<StringGraphType>("before");
+            Field<StringGraphType>("after");
         }
     }
 }

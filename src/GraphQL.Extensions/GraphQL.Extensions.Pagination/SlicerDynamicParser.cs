@@ -37,7 +37,7 @@ namespace GraphQL.Extensions.Pagination {
             Slicer slicer)
             where TEntity : class, new() {
 
-            
+            ParameterExpression param = selector.Parameters[0];
         }
 
         private static Expression StringFormatExpression(string formatString, params object[] args) {

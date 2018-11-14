@@ -7,7 +7,7 @@ namespace System.Linq{
         public static IQueryable<TEntity> Slice<TEntity>(this IQueryable<TEntity> query, Slicer slicer)
             where TEntity : class, new() {
             
-
+            
         }
     }
 }
