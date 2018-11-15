@@ -13,6 +13,8 @@ namespace System.Linq{
         public static IQueryable<TResult> Slice<TSource, TResult>(this IQueryable<TSource> query, Slicer slicer)
             where TSource : class
             where TResult : class, new() {
+
+            IEnumerable<string> orderByEntries = slicer.OrderBy.Split(',').Select(s => s.Trim());
             
             ParameterExpression param = (ParameterExpression)((MethodCallExpression)query.Expression).Arguments[0];
             Expression<Func<TSource, TResult>> selector =
@@ -20,11 +22,10 @@ namespace System.Linq{
                 
             IQueryable<TSource> baseQuery = query.Provider.CreateQuery<TSource>(param);
 
-            IQueryable<TResult> returnQuery = baseQuery.Select(SlicerDynamicParser.InjectCursorIntoSelector<TSource, TResult>(selector, orderByColumns));
+            IQueryable<TResult> returnQuery = baseQuery.Select(SlicerDynamicParser.InjectCursorIntoSelector<TSource, TResult>(selector, orderByEntries));
 
-            // foreach (var item in orderByColumns) {
             int i = 0;
-            foreach (string orderByEntry in slicer.OrderBy.Split(',').Select(s => s.Trim())) {
+            foreach (string orderByEntry in orderByEntries) {
 
                 OrderByColumn orderByColumn = new OrderByColumn(orderByEntry, typeof(TResult), param);
                 Expression<Func<TResult>> columnExpression = Expression.Lambda<Func<TResult>>(orderByColumn.MemberExpression, param);
