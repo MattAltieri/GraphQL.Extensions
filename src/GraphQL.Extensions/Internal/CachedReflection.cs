@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -11,16 +12,16 @@ namespace GraphQL.Extensions.Internal {
             "OrderBy",
             "OrderByDescending",
             "ThenBy",
-            "ThenByDescending'"
+            "ThenByDescending"
         };
 
         private static IEnumerable<MethodInfo> s_ExtensionMethods;
 
         static CachedReflection() {
             s_ExtensionMethods =
-                (from type in AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name == "System.Linq").GetTypes()
+                (from type in AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name == "System.Linq.Queryable").GetTypes()
                  where type.IsSealed
-                 && type.IsGenericType
+                 && !type.IsGenericType
                  && !type.IsNested
                  from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                  where method.IsDefined(typeof(ExtensionAttribute), false)
@@ -35,8 +36,8 @@ namespace GraphQL.Extensions.Internal {
                (s_OrderBy = s_ExtensionMethods
                 .Where(m => m.Name == "OrderBy" && m.GetParameters().Count() == 2)
                 .First()
-                .GetGenericMethodDefinition()
-                .MakeGenericMethod(TSource, TKey)));
+                .GetGenericMethodDefinition()))
+                .MakeGenericMethod(TSource, TKey);
 
         private static MethodInfo s_OrderByDescending;
 
@@ -45,8 +46,8 @@ namespace GraphQL.Extensions.Internal {
                (s_ExtensionMethods
                 .Where(m => m.Name == "OrderByDescending" && m.GetParameters().Count() == 2)
                 .First()
-                .GetGenericMethodDefinition()
-                .MakeGenericMethod(TSource, TKey)));
+                .GetGenericMethodDefinition()))
+                .MakeGenericMethod(TSource, TKey);
 
         private static MethodInfo s_ThenBy;
 
@@ -55,8 +56,8 @@ namespace GraphQL.Extensions.Internal {
                (s_ExtensionMethods
                 .Where(m => m.Name == "ThenBy" && m.GetParameters().Count() == 2)
                 .First()
-                .GetGenericMethodDefinition()
-                .MakeGenericMethod(TSource, TKey)));
+                .GetGenericMethodDefinition()))
+                .MakeGenericMethod(TSource, TKey);
 
         private static MethodInfo s_ThenByDescending;
 
@@ -65,7 +66,7 @@ namespace GraphQL.Extensions.Internal {
                (s_ExtensionMethods
                 .Where(m => m.Name == "ThenByDescending" && m.GetParameters().Count() == 2)
                 .First()
-                .GetGenericMethodDefinition()
-                .MakeGenericMethod(TSource, TKey)));
+                .GetGenericMethodDefinition()))
+                .MakeGenericMethod(TSource, TKey);
     }
 }
