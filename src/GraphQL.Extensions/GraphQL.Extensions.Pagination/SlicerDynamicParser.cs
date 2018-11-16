@@ -36,7 +36,6 @@ namespace GraphQL.Extensions.Pagination {
         
         internal static Expression<Func<TSource, TResult>> InjectCursorIntoSelector<TSource, TResult>(
             Expression<Func<TSource, TResult>> selector,
-            //Dictionary<int, OrderByColumn> columns)
             IEnumerable<string> orderByEntries)
             where TSource : class
             where TResult : class, new() {

@@ -10,7 +10,7 @@ using GraphQL.Extensions.Pagination.Internal;
 namespace System.Linq{
     public static class IQueryableSlicerExtensions {
 
-        public static IQueryable<TResult> Slice<TSource, TResult>(this IQueryable<TSource> query, Slicer slicer)
+        public static IQueryable<TResult> Slice<TSource, TResult>(this IQueryable<TSource> query, ISlicer slicer)
             where TSource : class
             where TResult : class, new() {
 
