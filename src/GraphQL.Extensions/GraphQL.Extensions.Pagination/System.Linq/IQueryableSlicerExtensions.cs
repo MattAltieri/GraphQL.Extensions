@@ -12,9 +12,12 @@ namespace System.Linq{
 
         public static IQueryable<TResult> Slice<TSource, TResult>(this IQueryable<TSource> query, ISlicer slicer)
             where TSource : class
-            where TResult : class, new() {
+            where TResult : class, new()
+            => Slice<TSource, TResult>(query, slicer, CursorInjector.Instance);
 
-            IEnumerable<string> orderByEntries = slicer.OrderBy.Split(',').Select(s => s.Trim());
+        internal static IQueryable<TResult> Slice<TSource, TResult>(IQueryable<TSource> query, ISlicer slicer, ICursorInjector cursorInjector)
+            where TSource : class
+            where TResult : class, new() {
             
             ParameterExpression param = (ParameterExpression)((MethodCallExpression)query.Expression).Arguments[0];
             Expression<Func<TSource, TResult>> selector =
@@ -22,10 +25,11 @@ namespace System.Linq{
                 
             IQueryable<TSource> baseQuery = query.Provider.CreateQuery<TSource>(param);
 
-            IQueryable<TResult> returnQuery = baseQuery.Select(SlicerDynamicParser.InjectCursorIntoSelector<TSource, TResult>(selector, orderByEntries));
+            // IQueryable<TResult> returnQuery = baseQuery.Select(SlicerDynamicParser.InjectCursorIntoSelector<TSource, TResult>(selector, slicer));
+            IQueryable<TResult> returnQuery = baseQuery.Select(cursorInjector.InjectIntoSelector(selector, slicer));
 
             int i = 0;
-            foreach (string orderByEntry in orderByEntries) {
+            foreach (string orderByEntry in slicer.OrderByEntries()) {
 
                 OrderByColumn orderByColumn = new OrderByColumn(orderByEntry, typeof(TResult), param);
                 Expression<Func<TResult>> columnExpression = Expression.Lambda<Func<TResult>>(orderByColumn.MemberExpression, param);

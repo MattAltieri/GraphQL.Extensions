@@ -36,7 +36,7 @@ namespace GraphQL.Extensions.Pagination {
         
         internal static Expression<Func<TSource, TResult>> InjectCursorIntoSelector<TSource, TResult>(
             Expression<Func<TSource, TResult>> selector,
-            IEnumerable<string> orderByEntries)
+            ISlicer slicer)
             where TSource : class
             where TResult : class, new() {
 
@@ -45,7 +45,7 @@ namespace GraphQL.Extensions.Pagination {
                 StringBuilder sb = new StringBuilder();
 
                 int i = 0;
-                foreach (var orderByEntry in orderByEntries) {
+                foreach (var orderByEntry in slicer.OrderByEntries()) {
 
                     OrderByColumn column = new OrderByColumn(orderByEntry, typeof(TSource), param);
 
