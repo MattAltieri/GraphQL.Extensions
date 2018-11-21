@@ -18,21 +18,50 @@ namespace GraphQL.Extensions.Pagination {
 
         public virtual IOrderedQueryable<TSource> Visit(OrderByInfo<TSource> orderBy) {
             
-            // MethodInfo orderByMethod;
-            // if (orderBy.SortDirection == SortDirections.Descending)
-            //     orderByMethod = CachedReflection.OrderByDescending(typeof(TSource), orderBy.GetMemberType());
-            // else
-            //     orderByMethod = CachedReflection.OrderBy(typeof(TSource), orderBy.GetMemberType());
-            throw new NotImplementedException();
+            MethodInfo orderByMethod;
+            if (orderBy.SortDirection == SortDirections.Descending)
+                orderByMethod = CachedReflection.OrderByDescending(typeof(TSource), orderBy.GetMemberType());
+            else
+                orderByMethod = CachedReflection.OrderBy(typeof(TSource), orderBy.GetMemberType());
+
+            MethodInfo lambdaMethod = CachedReflection.Lambda(typeof(TSource), orderBy.GetMemberType());
+            
+            Query = (IOrderedQueryable<TSource>)orderByMethod.Invoke(
+                null,
+                new object[] { Query, lambdaMethod.Invoke(
+                    null,
+                    new object[] { orderBy.GetMemberExpression(Parameter), Parameter }
+                )}
+            );
+            if (orderBy.ThenBy == null)
+                return (IOrderedQueryable<TSource>)Query;
+            return orderBy.ThenBy.Accept(this);
         }
 
         public virtual IOrderedQueryable<TSource> Visit(ThenByInfo<TSource> thenBy) {
 
-            throw new NotImplementedException();   
+            MethodInfo thenByMethod;
+            if (thenBy.SortDirection == SortDirections.Descending)
+                thenByMethod = CachedReflection.ThenByDescending(typeof(TSource), thenBy.GetMemberType());
+            else
+                thenByMethod = CachedReflection.ThenBy(typeof(TSource), thenBy.GetMemberType());
+
+            MethodInfo lambdaMethod = CachedReflection.Lambda(typeof(TSource), thenBy.GetMemberType());
+
+            Query = (IOrderedQueryable<TSource>)thenByMethod.Invoke(
+                null,
+                new object[] { Query, lambdaMethod.Invoke(
+                    null,
+                    new object[] { thenBy.GetMemberExpression(Parameter), Parameter }
+                )}
+            );
+            if (thenBy.ThenBy == null)
+                return (IOrderedQueryable<TSource>)Query;
+            return thenBy.ThenBy.Accept(this);
         }
 
-        public virtual Expression GetExpression(OrderByInfoBase<TSource> orderBy) {
-            throw new NotImplementedException();
-        }
+        // public virtual Expression GetExpression(OrderByInfoBase<TSource> orderBy) {
+        //     throw new NotImplementedException();
+        // }
     }
 }
