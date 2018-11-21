@@ -91,6 +91,103 @@ namespace GraphQL.Extensions.Internal {
             Enumerable.SequenceEqual(result, expectedResults).ShouldBeTrue();
         }
 
+        [Fact]
+        public void Should_GenerateLambdaExpression_When_LambdaCalledWithInt() {
+
+            ParameterExpression param = Expression.Parameter(TSource);
+            
+            Exception exception = Record.Exception(() => systemUnderTest = CachedReflection.Lambda(TSource, typeof(int)));
+            exception.ShouldBeNull();
+
+            MemberExpression property = Expression.MakeMemberAccess(param, TSource.GetProperty("Id"));
+
+            Expression<Func<MockEntity, int>> intExpression = null;
+            exception = Record.Exception(() =>
+                intExpression = (Expression<Func<MockEntity, int>>)systemUnderTest.Invoke(
+                    null,
+                    new object[] { property, new ParameterExpression[] { param } }));
+                        
+            exception.ShouldBeNull();
+            intExpression.ShouldNotBeNull();
+            
+            // expected result
+            intExpression.NodeType.ShouldBe(ExpressionType.Lambda);
+            intExpression.Type.ShouldBe(typeof(Func<MockEntity, int>));
+            intExpression.Parameters[0].Type.ShouldBe(TSource);
+
+            MemberExpression body = (MemberExpression)intExpression.Body;
+            body.NodeType.ShouldBe(ExpressionType.MemberAccess);
+            body.Type.ShouldBe(typeof(int));
+            body.Expression.NodeType.ShouldBe(ExpressionType.Parameter);
+            body.Member.Name.ShouldBe("Id");
+            body.Member.MemberType.ShouldBe(MemberTypes.Property);
+            ((PropertyInfo)body.Member).PropertyType.ShouldBe(typeof(int));
+        }
+
+        [Fact]
+        public void Should_GenerateLambdaExpression_When_LambdaCalledWithString() {
+
+            ParameterExpression param = Expression.Parameter(TSource);
+
+            Exception exception = Record.Exception(() => systemUnderTest = CachedReflection.Lambda(TSource, typeof(string)));
+            exception.ShouldBeNull();
+
+            MemberExpression property = Expression.MakeMemberAccess(param, TSource.GetProperty("Name"));
+
+            Expression<Func<MockEntity, string>> stringExpression = null;
+            exception = Record.Exception(() =>
+                stringExpression = (Expression<Func<MockEntity, string>>)systemUnderTest.Invoke(
+                    null,
+                    new object[] { property, new ParameterExpression[] { param } }
+                ));
+            exception.ShouldBeNull();
+            stringExpression.ShouldNotBeNull();
+
+            // expected result
+            stringExpression.NodeType.ShouldBe(ExpressionType.Lambda);
+            stringExpression.Type.ShouldBe(typeof(Func<MockEntity, string>));
+            stringExpression.Parameters[0].Type.ShouldBe(TSource);
+
+            MemberExpression body = (MemberExpression)stringExpression.Body;
+            body.NodeType.ShouldBe(ExpressionType.MemberAccess);
+            body.Type.ShouldBe(typeof(string));
+            body.Member.Name.ShouldBe("Name");
+            body.Member.MemberType.ShouldBe(MemberTypes.Property);
+            ((PropertyInfo)body.Member).PropertyType.ShouldBe(typeof(string));
+        }
+
+        [Fact]
+        public void Should_GenerateLambdaExpression_When_LambdaCalledWithDateTime() {
+
+            ParameterExpression param = Expression.Parameter(TSource);
+
+            Exception exception = Record.Exception(() => systemUnderTest = CachedReflection.Lambda(TSource, typeof(DateTime)));
+            exception.ShouldBeNull();
+
+            MemberExpression property = Expression.MakeMemberAccess(param, TSource.GetProperty("DOB"));
+
+            Expression<Func<MockEntity, DateTime>> stringExpression = null;
+            exception = Record.Exception(() =>
+                stringExpression = (Expression<Func<MockEntity, DateTime>>)systemUnderTest.Invoke(
+                    null,
+                    new object[] { property, new ParameterExpression[] { param } }
+                ));
+            exception.ShouldBeNull();
+            stringExpression.ShouldNotBeNull();
+
+            // expected result
+            stringExpression.NodeType.ShouldBe(ExpressionType.Lambda);
+            stringExpression.Type.ShouldBe(typeof(Func<MockEntity, DateTime>));
+            stringExpression.Parameters[0].Type.ShouldBe(TSource);
+
+            MemberExpression body = (MemberExpression)stringExpression.Body;
+            body.NodeType.ShouldBe(ExpressionType.MemberAccess);
+            body.Type.ShouldBe(typeof(DateTime));
+            body.Member.Name.ShouldBe("DOB");
+            body.Member.MemberType.ShouldBe(MemberTypes.Property);
+            ((PropertyInfo)body.Member).PropertyType.ShouldBe(typeof(DateTime));
+        }
+
         public static List<object[]> GetOrderByTestData
             => new List<object[]> {
                 new object[] {
