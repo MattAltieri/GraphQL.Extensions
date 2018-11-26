@@ -13,6 +13,8 @@ namespace GraphQL.Extensions.Pagination {
 
         public virtual ParameterExpression Parameter { get; protected set; }
 
+        public OrderByInfoVisitor() { }
+
         public OrderByInfoVisitor(IQueryable<TSource> query, ParameterExpression param)
             => (Query, Parameter) = (query, param);
 
@@ -59,9 +61,5 @@ namespace GraphQL.Extensions.Pagination {
                 return (IOrderedQueryable<TSource>)Query;
             return thenBy.ThenBy.Accept(this);
         }
-
-        // public virtual Expression GetExpression(OrderByInfoBase<TSource> orderBy) {
-        //     throw new NotImplementedException();
-        // }
     }
 }

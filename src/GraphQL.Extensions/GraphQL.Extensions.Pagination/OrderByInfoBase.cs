@@ -10,11 +10,13 @@ namespace GraphQL.Extensions.Pagination {
         private MemberInfo memberInfo;
         private Type memberType;
 
-        public ThenByInfo<TSource> ThenBy { get; set; }
+        public OrderByInfoBase() { }
 
-        public string ColumnName { get; set; }   
+        public virtual ThenByInfo<TSource> ThenBy { get; set; }
 
-        public SortDirections SortDirection { get; set; }
+        public virtual string ColumnName { get; set; }   
+
+        public virtual SortDirections SortDirection { get; set; }
 
         // public virtual IOrderedQueryable<TSource> Accept(OrderByVisitor<TSource> visitor) {
         //     if (ThenBy == null)

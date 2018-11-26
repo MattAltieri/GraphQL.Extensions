@@ -6,6 +6,8 @@ namespace GraphQL.Extensions.Pagination {
     public class ThenByInfo<TSource> : OrderByInfoBase<TSource>
         where TSource : class {
 
+        public ThenByInfo() { }
+
         public override IOrderedQueryable<TSource> Accept(OrderByInfoVisitor<TSource> visitor)
             => visitor.Visit(this);
     }
