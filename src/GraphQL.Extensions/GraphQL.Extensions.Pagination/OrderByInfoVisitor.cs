@@ -15,6 +15,9 @@ namespace GraphQL.Extensions.Pagination {
 
         public OrderByInfoVisitor() { }
 
+        public OrderByInfoVisitor(OrderByInfoVisitor<TSource> visitor)
+            => (Query, Parameter) = (visitor.Query, visitor.Parameter);
+
         public OrderByInfoVisitor(IQueryable<TSource> query, ParameterExpression param)
             => (Query, Parameter) = (query, param);
 
@@ -32,7 +35,7 @@ namespace GraphQL.Extensions.Pagination {
                 null,
                 new object[] { Query, lambdaMethod.Invoke(
                     null,
-                    new object[] { orderBy.GetMemberExpression(Parameter), Parameter }
+                    new object[] { orderBy.GetMemberExpression(Parameter), new ParameterExpression[] { Parameter } }
                 )}
             );
             if (orderBy.ThenBy == null)
@@ -54,7 +57,7 @@ namespace GraphQL.Extensions.Pagination {
                 null,
                 new object[] { Query, lambdaMethod.Invoke(
                     null,
-                    new object[] { thenBy.GetMemberExpression(Parameter), Parameter }
+                    new object[] { thenBy.GetMemberExpression(Parameter), new ParameterExpression[] { Parameter } }
                 )}
             );
             if (thenBy.ThenBy == null)
