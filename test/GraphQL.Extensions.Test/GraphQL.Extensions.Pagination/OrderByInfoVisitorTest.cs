@@ -16,7 +16,7 @@ namespace GraphQL.Extensions.Pagination {
 
         [Theory]
         [MemberData(nameof(GetSingleSortTestData))]
-        public void Should_ReturnOrderedQueryable_When_VisitingSingleSort(
+        public void Should_ReturnOrderedQueryable_When_VisitingOrderByInfo(
             string columnName,
             SortDirections sortDirection,
             IOrderedQueryable<MockEntity> compareTo,
@@ -36,6 +36,49 @@ namespace GraphQL.Extensions.Pagination {
             areEqual.HasValue.ShouldBeTrue();
 
             areEqual.Value.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetSingleSortTestData))]
+        public void Should_ReturnOrderedQueryable_When_VisitingThenByInfo(
+            string columnName,
+            SortDirections sortDirection,
+            IOrderedQueryable<MockEntity> compareTo,
+            bool expectedResult) {
+            
+            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_SingleSort.AsQueryable().OrderBy(o => 1), parameterExpression);
+
+            IOrderedQueryable<MockEntity> results = null;
+            ThenByInfo<MockEntity> thenBy = MakeThenByInfo(columnName, sortDirection, null, systemUnderTest);
+            Exception exception = Record.Exception(() => results = systemUnderTest.Visit(thenBy));
+            exception.ShouldBeNull();
+            results.ShouldNotBeNull();
+
+            bool? areEqual = null;
+            exception = Record.Exception(() => areEqual = results.SequenceEqual(compareTo));
+            exception.ShouldBeNull();
+            areEqual.HasValue.ShouldBeTrue();
+
+            areEqual.Value.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetSingleSortTestData))]
+        public void Should_ThrowNullReferenceException_When_VisitingThenByInfo_On_UnorderedData(
+            string columnName,
+            SortDirections sortDirection,
+            IOrderedQueryable<MockEntity> unused1,
+            bool unused2) {
+
+            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
+
+            IOrderedQueryable<MockEntity> results = null;
+            ThenByInfo<MockEntity> thenBy = MakeThenByInfo(columnName, sortDirection, null, systemUnderTest);
+            Exception exception = Record.Exception(() => results = systemUnderTest.Visit(thenBy));
+            exception.ShouldBeNull();
+            results.ShouldNotBeNull();
+
+            Assert.Throws<NullReferenceException>(() => results.ToList());
         }
 
         public static List<object[]> GetSingleSortTestData()
