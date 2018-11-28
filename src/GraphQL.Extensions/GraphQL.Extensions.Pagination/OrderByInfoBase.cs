@@ -24,7 +24,7 @@ namespace GraphQL.Extensions.Pagination {
         //     return visitor.Visit(this.ThenBy);
         // }
 
-        public abstract IOrderedQueryable<TSource> Accept(OrderByInfoVisitor<TSource> visitor);
+        public abstract IOrderedQueryable<TSource> Accept(SortVisitor<TSource> visitor);
 
         public virtual MemberExpression GetMemberExpression(ParameterExpression param) {
             return Expression.MakeMemberAccess(param, GetMemberInfo());

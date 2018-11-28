@@ -9,9 +9,9 @@ using Xunit;
 using Xunit.Should;
 
 namespace GraphQL.Extensions.Pagination {
-    public class OrderByInfoVisitorTest {
+    public class SortVisitorTest {
         
-        private OrderByInfoVisitor<MockEntity> systemUnderTest;
+        private SortVisitor<MockEntity> systemUnderTest;
         private ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntity), "o");
 
         [Theory]
@@ -22,7 +22,7 @@ namespace GraphQL.Extensions.Pagination {
             IOrderedQueryable<MockEntity> compareTo,
             bool expectedResult) {
             
-            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
+            systemUnderTest = new SortVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
 
             IOrderedQueryable<MockEntity> results = null;
             OrderByInfo<MockEntity> orderBy = MakeOrderByInfo(columnName, sortDirection, null, systemUnderTest);
@@ -46,7 +46,7 @@ namespace GraphQL.Extensions.Pagination {
             IOrderedQueryable<MockEntity> compareTo,
             bool expectedResult) {
             
-            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_SingleSort.AsQueryable().OrderBy(o => 1), parameterExpression);
+            systemUnderTest = new SortVisitor<MockEntity>(testData_SingleSort.AsQueryable().OrderBy(o => 1), parameterExpression);
 
             IOrderedQueryable<MockEntity> results = null;
             ThenByInfo<MockEntity> thenBy = MakeThenByInfo(columnName, sortDirection, null, systemUnderTest);
@@ -70,7 +70,7 @@ namespace GraphQL.Extensions.Pagination {
             IOrderedQueryable<MockEntity> unused1,
             bool unused2) {
 
-            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
+            systemUnderTest = new SortVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
 
             IOrderedQueryable<MockEntity> results = null;
             ThenByInfo<MockEntity> thenBy = MakeThenByInfo(columnName, sortDirection, null, systemUnderTest);
@@ -88,7 +88,7 @@ namespace GraphQL.Extensions.Pagination {
             IOrderedQueryable<MockEntity> compareTo,
             bool expectedResult) {
             
-            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_DoubleSort.AsQueryable(), parameterExpression);
+            systemUnderTest = new SortVisitor<MockEntity>(testData_DoubleSort.AsQueryable(), parameterExpression);
 
             ThenByInfo<MockEntity> thenBy =
                 MakeThenByInfo(sortDetails.ElementAt(1).Key, sortDetails.ElementAt(1).Value, null, systemUnderTest);
@@ -115,7 +115,7 @@ namespace GraphQL.Extensions.Pagination {
             IOrderedQueryable<MockEntity> compareTo,
             bool expectedResult) {
             
-            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_TripleSort.AsQueryable(), parameterExpression);
+            systemUnderTest = new SortVisitor<MockEntity>(testData_TripleSort.AsQueryable(), parameterExpression);
 
             ThenByInfo<MockEntity> thenBy_level2 =
                 MakeThenByInfo(sortDetails.ElementAt(2).Key, sortDetails.ElementAt(2).Value, null, systemUnderTest);
@@ -141,7 +141,7 @@ namespace GraphQL.Extensions.Pagination {
             string columnName,
             SortDirections sortDirection,
             ThenByInfo<MockEntity> thenBy,
-            OrderByInfoVisitor<MockEntity> systemUnderTest) {
+            SortVisitor<MockEntity> systemUnderTest) {
             
             Mock<OrderByInfo<MockEntity>> mock = new Mock<OrderByInfo<MockEntity>>();
 
@@ -156,7 +156,7 @@ namespace GraphQL.Extensions.Pagination {
             mock.Setup(m => m.GetMemberType()).Returns(memberType);
             mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
 
-            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
+            mock.Setup(m => m.Accept(It.IsAny<SortVisitor<MockEntity>>()))
                 .Returns(() => systemUnderTest.Visit(mock.Object));
 
             return mock.Object;
@@ -166,7 +166,7 @@ namespace GraphQL.Extensions.Pagination {
             string columnName,
             SortDirections sortDirection,
             ThenByInfo<MockEntity> thenBy,
-            OrderByInfoVisitor<MockEntity> systemUnderTest) {
+            SortVisitor<MockEntity> systemUnderTest) {
             
             Mock<ThenByInfo<MockEntity>> mock = new Mock<ThenByInfo<MockEntity>>();
 
@@ -181,7 +181,7 @@ namespace GraphQL.Extensions.Pagination {
             mock.Setup(m => m.GetMemberType()).Returns(memberType);
             mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
 
-            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
+            mock.Setup(m => m.Accept(It.IsAny<SortVisitor<MockEntity>>()))
                 .Returns(() => systemUnderTest.Visit(mock.Object));
 
             return mock.Object;

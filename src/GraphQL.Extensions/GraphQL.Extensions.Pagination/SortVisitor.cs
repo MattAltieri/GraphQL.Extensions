@@ -6,19 +6,19 @@ using System.Reflection;
 using GraphQL.Extensions.Internal;
 
 namespace GraphQL.Extensions.Pagination {
-    public class OrderByInfoVisitor<TSource>
+    public class SortVisitor<TSource>
         where TSource : class {
 
         public virtual IQueryable<TSource> Query { get; protected set; }
 
         public virtual ParameterExpression Parameter { get; protected set; }
 
-        public OrderByInfoVisitor() { }
+        public SortVisitor() { }
 
-        public OrderByInfoVisitor(OrderByInfoVisitor<TSource> visitor)
+        public SortVisitor(SortVisitor<TSource> visitor)
             => (Query, Parameter) = (visitor.Query, visitor.Parameter);
 
-        public OrderByInfoVisitor(IQueryable<TSource> query, ParameterExpression param)
+        public SortVisitor(IQueryable<TSource> query, ParameterExpression param)
             => (Query, Parameter) = (query, param);
 
         public virtual IOrderedQueryable<TSource> Visit(OrderByInfo<TSource> orderBy) {

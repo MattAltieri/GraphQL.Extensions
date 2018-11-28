@@ -90,7 +90,7 @@ namespace GraphQL.Extensions.Pagination {
             };
 
         private class MockOrderByInfo : OrderByInfoBase<MockEntity> {
-            public override IOrderedQueryable<MockEntity> Accept(OrderByInfoVisitor<MockEntity> visitor)
+            public override IOrderedQueryable<MockEntity> Accept(SortVisitor<MockEntity> visitor)
                 => throw new NotImplementedException();
         }
     }

@@ -8,7 +8,7 @@ namespace GraphQL.Extensions.Pagination {
 
         public ThenByInfo() { }
 
-        public override IOrderedQueryable<TSource> Accept(OrderByInfoVisitor<TSource> visitor)
+        public override IOrderedQueryable<TSource> Accept(SortVisitor<TSource> visitor)
             => visitor.Visit(this);
     }
 }
