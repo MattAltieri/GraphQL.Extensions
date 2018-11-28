@@ -81,6 +81,112 @@ namespace GraphQL.Extensions.Pagination {
             Assert.Throws<NullReferenceException>(() => results.ToList());
         }
 
+        [Theory]
+        [MemberData(nameof(GetDoubleSortTestData))]
+        public void Should_ReturnOrderedQueryable_When_VisitingDoubleSort(
+            Dictionary<string, SortDirections> sortDetails,
+            IOrderedQueryable<MockEntity> compareTo,
+            bool expectedResult) {
+            
+            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_DoubleSort.AsQueryable(), parameterExpression);
+
+            ThenByInfo<MockEntity> thenBy =
+                MakeThenByInfo(sortDetails.ElementAt(1).Key, sortDetails.ElementAt(1).Value, null, systemUnderTest);
+            OrderByInfo<MockEntity> orderBy =
+                MakeOrderByInfo(sortDetails.ElementAt(0).Key, sortDetails.ElementAt(0).Value, thenBy, systemUnderTest);
+            
+            IOrderedQueryable<MockEntity> results = null;
+            Exception exception = Record.Exception(() => results = systemUnderTest.Visit(orderBy));
+            exception.ShouldBeNull();
+            results.ShouldNotBeNull();
+
+            bool? areEqual = null;
+            exception = Record.Exception(() => areEqual = results.SequenceEqual(compareTo));
+            exception.ShouldBeNull();
+            areEqual.HasValue.ShouldBeTrue();
+
+            areEqual.Value.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetTripleSortTestData))]
+        public void Should_ReturnOrderedQueryable_When_VisitingTripleSort(
+            Dictionary<string, SortDirections> sortDetails,
+            IOrderedQueryable<MockEntity> compareTo,
+            bool expectedResult) {
+            
+            systemUnderTest = new OrderByInfoVisitor<MockEntity>(testData_TripleSort.AsQueryable(), parameterExpression);
+
+            ThenByInfo<MockEntity> thenBy_level2 =
+                MakeThenByInfo(sortDetails.ElementAt(2).Key, sortDetails.ElementAt(2).Value, null, systemUnderTest);
+            ThenByInfo<MockEntity> thenBy_level1 =
+                MakeThenByInfo(sortDetails.ElementAt(1).Key, sortDetails.ElementAt(1).Value, thenBy_level2, systemUnderTest);
+            OrderByInfo<MockEntity> orderBy =
+                MakeOrderByInfo(sortDetails.ElementAt(0).Key, sortDetails.ElementAt(0).Value, thenBy_level1, systemUnderTest);
+
+            IOrderedQueryable<MockEntity> results = null;
+            Exception exception = Record.Exception(() => results = systemUnderTest.Visit(orderBy));
+            exception.ShouldBeNull();
+            results.ShouldNotBeNull();
+
+            bool? areEqual = null;
+            exception = Record.Exception(() => areEqual = results.SequenceEqual(compareTo));
+            exception.ShouldBeNull();
+            areEqual.HasValue.ShouldBeTrue();
+
+            areEqual.Value.ShouldBe(expectedResult);            
+        }
+
+        private OrderByInfo<MockEntity> MakeOrderByInfo(
+            string columnName,
+            SortDirections sortDirection,
+            ThenByInfo<MockEntity> thenBy,
+            OrderByInfoVisitor<MockEntity> systemUnderTest) {
+            
+            Mock<OrderByInfo<MockEntity>> mock = new Mock<OrderByInfo<MockEntity>>();
+
+            mock.Setup(m => m.ColumnName).Returns(columnName);
+            mock.Setup(m => m.SortDirection).Returns(sortDirection);
+            mock.Setup(m => m.ThenBy).Returns(thenBy);
+
+            MemberInfo memberInfo = typeof(MockEntity).GetMember(columnName).First();
+            Type memberType = (memberInfo as PropertyInfo)?.PropertyType ?? ((FieldInfo)memberInfo).FieldType;
+            MemberExpression memberExpression = Expression.MakeMemberAccess(parameterExpression, memberInfo);
+            mock.Setup(m => m.GetMemberInfo()).Returns(memberInfo);
+            mock.Setup(m => m.GetMemberType()).Returns(memberType);
+            mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
+
+            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
+                .Returns(() => systemUnderTest.Visit(mock.Object));
+
+            return mock.Object;
+        }
+
+        private ThenByInfo<MockEntity> MakeThenByInfo(
+            string columnName,
+            SortDirections sortDirection,
+            ThenByInfo<MockEntity> thenBy,
+            OrderByInfoVisitor<MockEntity> systemUnderTest) {
+            
+            Mock<ThenByInfo<MockEntity>> mock = new Mock<ThenByInfo<MockEntity>>();
+
+            mock.Setup(m => m.ColumnName).Returns(columnName);
+            mock.Setup(m => m.SortDirection).Returns(sortDirection);
+            mock.Setup(m => m.ThenBy).Returns(thenBy);
+
+            MemberInfo memberInfo = typeof(MockEntity).GetMember(columnName).First();
+            Type memberType = (memberInfo as PropertyInfo)?.PropertyType ?? ((FieldInfo)memberInfo).FieldType;
+            MemberExpression memberExpression = Expression.MakeMemberAccess(parameterExpression, memberInfo);
+            mock.Setup(m => m.GetMemberInfo()).Returns(memberInfo);
+            mock.Setup(m => m.GetMemberType()).Returns(memberType);
+            mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
+
+            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
+                .Returns(() => systemUnderTest.Visit(mock.Object));
+
+            return mock.Object;
+        }
+
         public static List<object[]> GetSingleSortTestData()
             => new List<object[]> {
                 new object[] {
@@ -157,55 +263,1309 @@ namespace GraphQL.Extensions.Pagination {
                 },
             };
 
-        private OrderByInfo<MockEntity> MakeOrderByInfo(
-            string columnName,
-            SortDirections sortDirection,
-            ThenByInfo<MockEntity> thenBy,
-            OrderByInfoVisitor<MockEntity> systemUnderTest) {
-            
-            Mock<OrderByInfo<MockEntity>> mock = new Mock<OrderByInfo<MockEntity>>();
+        public static List<object[]> GetDoubleSortTestData
+            => new List<object[]> {
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Id).ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Id).ThenByDescending(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Id).ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Name).ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Name).ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Id).ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Id).ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Id).ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.DOB).ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.DOB).ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Name).ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.Name).ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.Name).ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.DOB).ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderByDescending(o => o.DOB).ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_DoubleSort.AsQueryable().OrderBy(o => o.DOB).ThenByDescending(o => o.Name),
+                    false,
+                },
+            };
 
-            mock.Setup(m => m.ColumnName).Returns(columnName);
-            mock.Setup(m => m.SortDirection).Returns(sortDirection);
-            mock.Setup(m => m.ThenBy).Returns(thenBy);
-
-            MemberInfo memberInfo = typeof(MockEntity).GetMember(columnName).First();
-            Type memberType = (memberInfo as PropertyInfo)?.PropertyType ?? ((FieldInfo)memberInfo).FieldType;
-            MemberExpression memberExpression = Expression.MakeMemberAccess(parameterExpression, memberInfo);
-            mock.Setup(m => m.GetMemberInfo()).Returns(memberInfo);
-            mock.Setup(m => m.GetMemberType()).Returns(memberType);
-            mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
-
-            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
-                .Returns(() => systemUnderTest.Visit(mock.Object));
-
-            return mock.Object;
-        }
-
-        private ThenByInfo<MockEntity> MakeThenByInfo(
-            string columnName,
-            SortDirections sortDirection,
-            ThenByInfo<MockEntity> thenBy,
-            OrderByInfoVisitor<MockEntity> systemUnderTest) {
-            
-            Mock<ThenByInfo<MockEntity>> mock = new Mock<ThenByInfo<MockEntity>>();
-
-            mock.Setup(m => m.ColumnName).Returns(columnName);
-            mock.Setup(m => m.SortDirection).Returns(sortDirection);
-            mock.Setup(m => m.ThenBy).Returns(thenBy);
-
-            MemberInfo memberInfo = typeof(MockEntity).GetMember(columnName).First();
-            Type memberType = (memberInfo as PropertyInfo)?.PropertyType ?? ((FieldInfo)memberInfo).FieldType;
-            MemberExpression memberExpression = Expression.MakeMemberAccess(parameterExpression, memberInfo);
-            mock.Setup(m => m.GetMemberInfo()).Returns(memberInfo);
-            mock.Setup(m => m.GetMemberType()).Returns(memberType);
-            mock.Setup(m => m.GetMemberExpression(It.IsAny<ParameterExpression>())).Returns(memberExpression);
-
-            mock.Setup(m => m.Accept(It.IsAny<OrderByInfoVisitor<MockEntity>>()))
-                .Returns(() => systemUnderTest.Visit(mock.Object));
-
-            return mock.Object;
-        }
+        public static List<object[]> GetTripleSortTestData
+            => new List<object[]> {
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Id)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenByDescending(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenByDescending(o => o.DOB),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.DOB),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Ascending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenBy(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "Name", SortDirections.Descending },
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.Name)
+                        .ThenByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenByDescending(o => o.Id),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Name)
+                        .ThenBy(o => o.Id),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenByDescending(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Ascending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Ascending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Ascending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenBy(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderByDescending(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenByDescending(o => o.Name),
+                    true,
+                },
+                new object[] {
+                    new Dictionary<string, SortDirections> {
+                        { "DOB", SortDirections.Descending },
+                        { "Id", SortDirections.Descending },
+                        { "Name", SortDirections.Descending },
+                    },
+                    testData_TripleSort.AsQueryable()
+                        .OrderBy(o => o.DOB)
+                        .ThenByDescending(o => o.Id)
+                        .ThenBy(o => o.Name),
+                    false,
+                },
+            };
 
         private static List<MockEntity> testData_SingleSort = new List<MockEntity> {
             new MockEntity {
@@ -220,7 +1580,7 @@ namespace GraphQL.Extensions.Pagination {
             }
         };
 
-        private List<MockEntity> testData_DoubleSort = new List<MockEntity> {
+        private static List<MockEntity> testData_DoubleSort = new List<MockEntity> {
             new MockEntity {
                 Id = 1,
                 Name = "A",
@@ -283,7 +1643,7 @@ namespace GraphQL.Extensions.Pagination {
             },
         };
 
-        private List<MockEntity> testData_TripleSort = new List<MockEntity> {
+        private static List<MockEntity> testData_TripleSort = new List<MockEntity> {
             new MockEntity {
                 Id = 1,
                 Name = "A",
