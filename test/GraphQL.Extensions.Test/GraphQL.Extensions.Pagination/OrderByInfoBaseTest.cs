@@ -54,6 +54,18 @@ namespace GraphQL.Extensions.Pagination {
             ((PropertyInfo)memberExpression.Member).PropertyType.ShouldBe(((PropertyInfo)memberExpression.Member).PropertyType);
         }
 
+        [Theory]
+        [MemberData(nameof(GetCursorPrefixTestData))]
+        public void Should_ReturnCursorPrefix_When_GetCursorPrefixCalled(OrderByInfo<MockEntity> orderBy, string cursorDelim, string expectedResult) {
+
+            string result = null;
+            Exception exception = Record.Exception(() => result = orderBy.GetCursorPrefix(cursorDelim));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
         public static List<object[]> GetMemberInfoTestData()
             => new List<object[]> {
                 new object[] {
@@ -89,8 +101,90 @@ namespace GraphQL.Extensions.Pagination {
                 },
             };
 
+        public static List<object[]> GetCursorPrefixTestData
+            => new List<object[]> {
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "id::a::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "id::d::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "name::a::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "name::d::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "dob::a::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    "::",
+                    "dob::d::"
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    ",.?$/",
+                    "id,.?$/a,.?$/"
+                },
+            };
+
+        public static List<object[]> GetTestDataForAddKeyColumnTest
+            => new List<object[]> {
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    
+                },
+            };
+
         private class MockOrderByInfo : OrderByInfoBase<MockEntity> {
             public override IOrderedQueryable<MockEntity> Accept(SortVisitor<MockEntity> visitor)
+                => throw new NotImplementedException();
+
+            public override Cursor Accept<TResult>(CursorVisitor<MockEntity, TResult> visitor)
                 => throw new NotImplementedException();
         }
     }

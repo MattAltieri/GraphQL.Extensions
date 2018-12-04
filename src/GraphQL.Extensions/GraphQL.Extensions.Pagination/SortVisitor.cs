@@ -38,6 +38,7 @@ namespace GraphQL.Extensions.Pagination {
                     new object[] { orderBy.GetMemberExpression(Parameter), new ParameterExpression[] { Parameter } }
                 )}
             );
+            
             if (orderBy.ThenBy == null)
                 return (IOrderedQueryable<TSource>)Query;
             return orderBy.ThenBy.Accept(this);

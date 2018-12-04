@@ -86,20 +86,6 @@ namespace GraphQL.Extensions.Internal {
         private static MethodInfo s_Lambda;
 
         public static MethodInfo Lambda(Type TSource, Type TKey)
-        //  {
-            
-        //     var temp = s_ExtensionMethods
-        //         .Where(m => m.Name == "Lambda")
-        //         .Select(m => new {
-        //             Method = m,
-        //             Parameters = m.GetParameters()
-        //         })
-        //         .Where(m => m.Parameters.Count() == 2)
-        //         .Select(m => $"{m.Parameters[0].ParameterType.ToString()} + {m.Parameters[1].ParameterType.ToString()}")
-        //         .ToList();
-            
-        //     return s_Lambda;
-        // }
             => (s_Lambda ??
                (s_Lambda = s_ExtensionMethods
                 .Where(m => m.Name == "Lambda")
@@ -114,5 +100,105 @@ namespace GraphQL.Extensions.Internal {
                 .First()
                 .GetGenericMethodDefinition()))
                 .MakeGenericMethod(typeof(Func<,>).MakeGenericType(TSource, TKey));
+
+        private static MethodInfo s_StringFormat;
+
+        public static MethodInfo StringFormat()
+            => (s_StringFormat ??
+               (s_StringFormat = typeof(string).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(m => m.Name == "Format")
+                    .Select(m => new {
+                        Method = m,
+                        Parameters = m.GetParameters()
+                    })
+                    .Where(m => m.Parameters.Count() == 2
+                        && m.Parameters[0].ParameterType == typeof(string)
+                        && m.Parameters[1].GetCustomAttribute(typeof(ParamArrayAttribute), false) != null)
+                    .Select(m => m.Method)
+                    .First()));
+
+        private static Dictionary<Type, MethodInfo> s_ToStringMethods = new Dictionary<Type, MethodInfo>();
+
+        public static MethodInfo ToString(Type type) {
+
+            if (!PrimitiveTypes.Contains(type))
+                throw new ArgumentNullException(type.Name);
+
+            if (!s_ToStringMethods.ContainsKey(type)) {
+                s_ToStringMethods.Add(
+                    type,
+                    type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(m => m.Name == "ToString" && m.GetParameters().Count() == 0)
+                        .First()
+                );
+            }
+            
+            return s_ToStringMethods[type];
+        }
+
+        private static PropertyInfo s_DateTimeTicks;
+
+        public static PropertyInfo DateTimeTicks()
+            => (s_DateTimeTicks ??
+               (s_DateTimeTicks = typeof(DateTime).GetProperty("Ticks")));
+
+        private static Dictionary<Type, PropertyInfo> s_NullableHasValueProperties = new Dictionary<Type, PropertyInfo>();
+
+        public static PropertyInfo NullableHasValue(Type type) {
+
+            if (!NullableTypes.Contains(type))
+                throw new ArgumentNullException(type.Name);
+
+            if (!s_NullableHasValueProperties.ContainsKey(type)) {
+                s_NullableHasValueProperties.Add(
+                    type,
+                    type.GetProperty("HasValue")
+                );
+            }
+
+            return s_NullableHasValueProperties[type];
+        }
+
+        private static Dictionary<Type, PropertyInfo> s_NullableValueProperties = new Dictionary<Type, PropertyInfo>();
+
+        public static PropertyInfo NullableValue(Type type) {
+
+            if (!NullableTypes.Contains(type))
+                throw new ArgumentNullException(type.Name);
+
+            if (!s_NullableValueProperties.ContainsKey(type)) {
+                s_NullableValueProperties.Add(
+                    type,
+                    type.GetProperty("Value")
+                );
+            }
+
+            return s_NullableValueProperties[type];
+        }
+
+        private static IEnumerable<Type> PrimitiveTypes
+            => new List<Type> {
+                typeof(char),
+                typeof(short),
+                typeof(int),
+                typeof(long),
+                typeof(decimal),
+                typeof(float),
+                typeof(double),
+                typeof(bool)
+            };
+
+        private static IEnumerable<Type> NullableTypes
+            => new List<Type> {
+                typeof(char?),
+                typeof(short?),
+                typeof(int?),
+                typeof(long?),
+                typeof(decimal?),
+                typeof(float?),
+                typeof(double?),
+                typeof(bool?),
+                typeof(DateTime?),
+            };
     }
 }

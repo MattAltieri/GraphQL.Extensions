@@ -55,5 +55,218 @@ namespace GraphQL.Extensions.Pagination {
             exception.ShouldBeNull();
             mockVisitor.Verify(o => o.Visit(It.IsAny<OrderByInfo<MockEntity>>()), Times.Never);
         }
+
+        [Theory]
+        [MemberData(nameof(GetTestData))]
+        public void Should_CalculateCorrectHashCode_When_GetHashCodeCalled(
+            ThenByInfo< MockEntity> operand1,
+            ThenByInfo< MockEntity> operand2_unused,
+            bool expectedEquality_unused,
+            int expectedHashCode,
+            int expectedDepth_unused) {
+            
+            int? result = null;
+            Exception exception = Record.Exception(() => result = operand1.GetHashCode());
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.ShouldBe(expectedHashCode);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetTestData))]
+        public void Should_CalculateEqualityCorrectly_When_ComparingTwoInstances(
+            ThenByInfo< MockEntity> operand1,
+            ThenByInfo< MockEntity> operand2,
+            bool expectedEquality,
+            int expectedHashCode_unused,
+            int expectedDepth_unused) {
+            
+            bool? result = null;
+            Exception exception = Record.Exception(() => result = operand1.Equals(operand2));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.ShouldBe(expectedEquality);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetTestData))]
+        public void Should_CalculateDepthCorrectly_When_DepthCalled(
+            ThenByInfo< MockEntity> operand1,
+            ThenByInfo< MockEntity> operand2_unused,
+            bool expectedEquality_unused,
+            int expectedHashCode_unused,
+            int expectedDepth) {
+            
+            int? result = null;
+            Exception exception = Record.Exception(() => result = operand1.Depth);
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.ShouldBe(expectedDepth);
+        }
+
+        public static List<object[]> GetTestData
+            => new List<object[]> {
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    true,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Id".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    false,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Id".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    false,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Id".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        },
+                    },
+                    // expectedEquality
+                    false,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Id".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    true,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Name".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    false,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Name".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+                new object[] {
+                    // operand1
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // operand2
+                    new ThenByInfo< MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    // expectedEquality
+                    false,
+                    // expectedHashCode (of operand1)
+                    unchecked((17 * 173) +
+                        "Name".GetHashCode() +
+                        SortDirections.Ascending.GetHashCode()),
+                    // expectedDepth (of operand1)
+                    1
+                },
+            };
     }
 }

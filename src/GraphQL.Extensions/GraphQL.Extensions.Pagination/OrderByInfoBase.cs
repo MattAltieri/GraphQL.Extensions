@@ -18,13 +18,12 @@ namespace GraphQL.Extensions.Pagination {
 
         public virtual SortDirections SortDirection { get; set; }
 
-        // public virtual IOrderedQueryable<TSource> Accept(OrderByVisitor<TSource> visitor) {
-        //     if (ThenBy == null)
-        //         return (IOrderedQueryable<TSource>)visitor.Query;
-        //     return visitor.Visit(this.ThenBy);
-        // }
+        public virtual int Depth => (ThenBy?.Depth ?? 0) + 1;
 
         public abstract IOrderedQueryable<TSource> Accept(SortVisitor<TSource> visitor);
+
+        public abstract Cursor Accept<TResult>(CursorVisitor<TSource, TResult> visitor)
+            where TResult : class, new();
 
         public virtual MemberExpression GetMemberExpression(ParameterExpression param) {
             return Expression.MakeMemberAccess(param, GetMemberInfo());
@@ -46,6 +45,21 @@ namespace GraphQL.Extensions.Pagination {
                 return memberType;
             MemberInfo member = GetMemberInfo();
             return memberType = (member as PropertyInfo)?.PropertyType ?? ((FieldInfo)member).FieldType;
+        }
+
+        public virtual string GetCursorPrefix(string cursorSubsegmentDelimiter)
+            => ColumnName.ToLower() + cursorSubsegmentDelimiter +
+                (SortDirection == SortDirections.Ascending ? "a" : "d") +
+                cursorSubsegmentDelimiter;
+
+        public virtual void AddKeyColumnIfMissing(string columnName) {
+            
+            if (ColumnName == columnName) return;
+            
+            if (ThenBy == null)
+                ThenBy = new ThenByInfo<TSource>(columnName, SortDirections.Ascending);
+            else
+                ThenBy.AddKeyColumnIfMissing(columnName);
         }
     }
 }
