@@ -64,11 +64,13 @@ namespace GraphQL.Extensions.Pagination {
 
         [Theory]
         [MemberData(nameof(GetSingleSortTestData))]
+#pragma warning disable xUnit1026
         public void Should_ThrowNullReferenceException_When_VisitingThenByInfo_On_UnorderedData(
             string columnName,
             SortDirections sortDirection,
             IOrderedQueryable<MockEntity> unused1,
             bool unused2) {
+#pragma warning restore xUnit1026
 
             systemUnderTest = new SortVisitor<MockEntity>(testData_SingleSort.AsQueryable(), parameterExpression);
 

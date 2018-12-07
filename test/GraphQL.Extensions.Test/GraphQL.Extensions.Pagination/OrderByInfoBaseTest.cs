@@ -66,6 +66,20 @@ namespace GraphQL.Extensions.Pagination {
             result.ShouldBe(expectedResult);
         }
 
+        [Theory]
+        [MemberData(nameof(GetTestDataForAddKeyColumnTest))]
+        public void Should_AddKeyColumn_WhenAddKeyColumnIsMissingCalled(
+            OrderByInfo<MockEntity> systemUnderTest,
+            string keyColumn,
+            OrderByInfo<MockEntity> expectedResult) {
+
+            Exception exception = Record.Exception(() => systemUnderTest.AddKeyColumnIfMissing(keyColumn));
+            exception.ShouldBeNull();
+            systemUnderTest.ShouldNotBeNull();
+
+            systemUnderTest.ShouldBe(expectedResult);
+        }
+
         public static List<object[]> GetMemberInfoTestData()
             => new List<object[]> {
                 new object[] {
@@ -176,7 +190,50 @@ namespace GraphQL.Extensions.Pagination {
                         SortDirection = SortDirections.Descending,
                         ThenBy = null,
                     },
-                    
+                    "Id",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        },
+                    },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        },
+                    },
+                    "Id",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        },
+                    },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    "Id",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
                 },
             };
 

@@ -7,6 +7,7 @@ namespace GraphQL.Extensions.Pagination {
         where TSource : class {
         
         string CursorValue { get; set; }
+        CursorFilterTypes CursorFilterType { get; set; }
         OrderByInfo<TSource> OrderBy { get; set; }
 
         Expression<Func<TSource, bool>> GetFilterPredicate();

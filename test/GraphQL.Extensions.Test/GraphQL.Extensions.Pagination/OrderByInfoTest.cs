@@ -80,12 +80,14 @@ namespace GraphQL.Extensions.Pagination {
         [MemberData(nameof(GetTestData_SingleSort))]
         [MemberData(nameof(GetTestData_DoubleSort))]
         [MemberData(nameof(GetTestData_TripleSort))]
+#pragma warning disable xUnit1026
         public void Should_CalculateCorrectHashCode_When_GetHashCodeCalled(
             OrderByInfo<MockEntity> operand1,
             OrderByInfo<MockEntity> operand2_unused,
             bool expectedEquality_unused,
             int expectedHashCode,
             int expectedDepth_unused) {
+#pragma warning restore xUnit1026
             
             int? result = null;
             Exception exception = Record.Exception(() => result = operand1.GetHashCode());
@@ -99,12 +101,14 @@ namespace GraphQL.Extensions.Pagination {
         [MemberData(nameof(GetTestData_SingleSort))]
         [MemberData(nameof(GetTestData_DoubleSort))]
         [MemberData(nameof(GetTestData_TripleSort))]
+#pragma warning disable xUnit1026
         public void Should_CalculateEqualityCorrectly_When_ComparingTwoInstances(
             OrderByInfo<MockEntity> operand1,
             OrderByInfo<MockEntity> operand2,
             bool expectedEquality,
             int expectedHashCode_unused,
             int expectedDepth_unused) {
+#pragma warning restore xUnit1026
             
             bool? result = null;
             Exception exception = Record.Exception(() => result = operand1.Equals(operand2));
@@ -118,12 +122,14 @@ namespace GraphQL.Extensions.Pagination {
         [MemberData(nameof(GetTestData_SingleSort))]
         [MemberData(nameof(GetTestData_DoubleSort))]
         [MemberData(nameof(GetTestData_TripleSort))]
+#pragma warning disable xUnit1026
         public void Should_CalculateDepthCorrectly_When_DepthCalled(
             OrderByInfo<MockEntity> operand1,
             OrderByInfo<MockEntity> operand2_unused,
             bool expectedEquality_unused,
             int expectedHashCode_unused,
             int expectedDepth) {
+#pragma warning restore xUnit1026
             
             int? result = null;
             Exception exception = Record.Exception(() => result = operand1.Depth);

@@ -58,12 +58,14 @@ namespace GraphQL.Extensions.Pagination {
 
         [Theory]
         [MemberData(nameof(GetTestData))]
+#pragma warning disable xUnit1026
         public void Should_CalculateCorrectHashCode_When_GetHashCodeCalled(
             ThenByInfo< MockEntity> operand1,
             ThenByInfo< MockEntity> operand2_unused,
             bool expectedEquality_unused,
             int expectedHashCode,
             int expectedDepth_unused) {
+#pragma warning restore xUnit1026
             
             int? result = null;
             Exception exception = Record.Exception(() => result = operand1.GetHashCode());
@@ -75,12 +77,14 @@ namespace GraphQL.Extensions.Pagination {
 
         [Theory]
         [MemberData(nameof(GetTestData))]
+#pragma warning disable xUnit1026        
         public void Should_CalculateEqualityCorrectly_When_ComparingTwoInstances(
             ThenByInfo< MockEntity> operand1,
             ThenByInfo< MockEntity> operand2,
             bool expectedEquality,
             int expectedHashCode_unused,
             int expectedDepth_unused) {
+#pragma warning restore xUnit1026
             
             bool? result = null;
             Exception exception = Record.Exception(() => result = operand1.Equals(operand2));
@@ -92,12 +96,14 @@ namespace GraphQL.Extensions.Pagination {
 
         [Theory]
         [MemberData(nameof(GetTestData))]
+#pragma warning disable xUnit1026
         public void Should_CalculateDepthCorrectly_When_DepthCalled(
             ThenByInfo< MockEntity> operand1,
             ThenByInfo< MockEntity> operand2_unused,
             bool expectedEquality_unused,
             int expectedHashCode_unused,
             int expectedDepth) {
+#pragma warning restore xUnit1026
             
             int? result = null;
             Exception exception = Record.Exception(() => result = operand1.Depth);

@@ -51,50 +51,8 @@ namespace GraphQL.Extensions.Pagination {
         //     }
         // }
 
-        private BinaryExpression GetBinaryExpression(CursorFilterTypes filterType, SortDirections direction, Expression left, Expression right) {
+        
 
-            if (filterType == CursorFilterTypes.After)
-                if (direction == SortDirections.Ascending)
-                    return Expression.GreaterThan(left, right);
-                else
-                    return Expression.LessThan(left, right);
-            else
-                if (direction == SortDirections.Ascending)
-                    return Expression.LessThan(left, right);
-                else
-                    return Expression.GreaterThan(left, right);
-        }
-
-        private ConstantExpression GetConstantExpression(string value, string type) {
-
-            if (type == "string")
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException($"{nameof(value)} of type string cannot be null or empty.");
-                else
-                    return Expression.Constant(value);
-            else {            
-
-                if (type == "char")
-                    return Expression.Constant(char.Parse(value));
-                else if (type == "short")
-                    return Expression.Constant(short.Parse(value));
-                else if (type == "int")
-                    return Expression.Constant(int.Parse(value));
-                else if (type == "long")
-                    return Expression.Constant(long.Parse(value));
-                else if (type == "decimal")
-                    return Expression.Constant(decimal.Parse(value));
-                else if (type == "float")
-                    return Expression.Constant(float.Parse(value));
-                else if (type == "double")
-                    return Expression.Constant(double.Parse(value));
-                else if (type == "bool")
-                    return Expression.Constant(bool.Parse(value));
-                else if (type == "DateTime")
-                    return Expression.Constant(new DateTime(long.Parse(value)));
-                else
-                    throw new ArgumentException($"{type} is not a supported type.");
-            }
-        }
+        
     }
 }
