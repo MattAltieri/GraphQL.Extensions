@@ -176,6 +176,17 @@ namespace GraphQL.Extensions.Internal {
             return s_NullableValueProperties[type];
         }
 
+        private static MethodInfo s_StringCompareTo;
+        
+        public static MethodInfo StringCompareTo()
+            => (s_StringCompareTo ??
+               (s_StringCompareTo = typeof(string).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(m => m.Name == "CompareTo")
+                    .Where(m => m.GetParameters()[0].ParameterType == typeof(string))
+                    .First()));
+
+        // TODO: write test case
+
         private static IEnumerable<Type> PrimitiveTypes
             => new List<Type> {
                 typeof(char),

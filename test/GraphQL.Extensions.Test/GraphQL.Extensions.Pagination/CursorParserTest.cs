@@ -96,7 +96,7 @@ namespace GraphQL.Extensions.Pagination {
             OrderByInfo<MockEntity> orderBy,
             Expression<Func<MockEntity, bool>> expressionTree,
             bool expectedResult) {
-
+            
             CursorParser<MockEntity> systemUnderTest = null;
             Exception exception = Record.Exception(() =>
                 systemUnderTest = new CursorParser<MockEntity>(cursorValue, cursorFilterType, cursorSegmentDelimiter, cursorSubsegmentDelimiter,
