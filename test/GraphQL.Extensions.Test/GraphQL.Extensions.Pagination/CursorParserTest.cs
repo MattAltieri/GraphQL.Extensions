@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Linq.Expressions.Compare;
 using Moq;
 using GraphQL.Extensions.Test;
 using Xunit;
+using Xunit2.Should;
 using System.Linq;
 using System.Reflection;
 
 namespace GraphQL.Extensions.Pagination {
     public class CursorParserTest {
 
-        private ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntity), "o");
+        private static ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntity), "f");
 
         [Fact]
         public void Should_ThrowArgumentNullException_When_NullCursorProvided() {
@@ -83,6 +85,40 @@ namespace GraphQL.Extensions.Pagination {
                 systemUnderTest = new CursorParser<MockEntity>("abc", CursorFilterTypes.After,
                     "::", "//", null));
         }
+
+        [Theory]
+        [MemberData(nameof(GetCursorTestData))]
+        public void Should_CreateExpressionTree_When_ParsingCursor(
+            string cursorValue,
+            CursorFilterTypes cursorFilterType,
+            string cursorSegmentDelimiter,
+            string cursorSubsegmentDelimiter,
+            OrderByInfo<MockEntity> orderBy,
+            Expression<Func<MockEntity, bool>> expressionTree,
+            bool expectedResult) {
+
+            CursorParser<MockEntity> systemUnderTest = null;
+            Exception exception = Record.Exception(() =>
+                systemUnderTest = new CursorParser<MockEntity>(cursorValue, cursorFilterType, cursorSegmentDelimiter, cursorSubsegmentDelimiter,
+                orderBy));
+            exception.ShouldBeNull();
+            systemUnderTest.ShouldNotBeNull();
+
+            Expression<Func<MockEntity, bool>> resultPredicate = null;
+            exception = Record.Exception(() => resultPredicate = systemUnderTest.GetFilterPredicate());
+            exception.ShouldBeNull();
+            resultPredicate.ShouldNotBeNull();
+            
+            ExpressionTreeComparer comparer = new ExpressionTreeComparer();
+            
+            bool? result = null;
+            exception = Record.Exception(() =>
+                result = comparer.Equals(resultPredicate, expressionTree));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
         
         private OrderByInfo<MockEntity> MakeOrderByInfo(
             string columnName,
@@ -112,8 +148,7 @@ namespace GraphQL.Extensions.Pagination {
         private ThenByInfo<MockEntity> MakeThenByInfo(
             string columnName,
             SortDirections sortDirection,
-            ThenByInfo<MockEntity> thenBy
-        ) {
+            ThenByInfo<MockEntity> thenBy) {
 
             Mock<ThenByInfo<MockEntity>> mock = new Mock<ThenByInfo<MockEntity>>();
 
@@ -131,5 +166,159 @@ namespace GraphQL.Extensions.Pagination {
 
             return mock.Object;
         }
+
+        public static List<object[]> GetCursorTestData
+            => new List<object[]> {
+                new object[] {
+                    "id::a::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::4000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(4000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Name")[0]
+                                ),
+                                Expression.Constant("Matt")
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+            };
     }
 }

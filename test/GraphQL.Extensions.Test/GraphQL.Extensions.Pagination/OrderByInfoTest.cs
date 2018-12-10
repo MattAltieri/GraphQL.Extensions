@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using GraphQL.Extensions.Test;
 using Moq;
 using Xunit;
-using Xunit.Should;
+using Xunit2.Should;
 
 namespace GraphQL.Extensions.Pagination {
     public class OrderByInfoTest {

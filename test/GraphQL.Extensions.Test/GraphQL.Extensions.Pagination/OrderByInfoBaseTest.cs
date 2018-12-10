@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
-using Xunit.Should;
+using Xunit2.Should;
 
 namespace GraphQL.Extensions.Pagination {
     

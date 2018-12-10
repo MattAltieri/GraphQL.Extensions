@@ -39,7 +39,7 @@ namespace GraphQL.Extensions.Pagination {
         public OrderByInfo<TSource> OrderBy { get; set; }
 
         public Expression<Func<TSource, bool>> GetFilterPredicate() {
-
+            
             var cursorSegments = CursorValue.Split(new[] { cursorSegmentDelimiter }, StringSplitOptions.None);
 
             if (cursorSegments.Length != OrderBy.Depth)
@@ -49,12 +49,12 @@ namespace GraphQL.Extensions.Pagination {
             OrderByInfoBase<TSource> orderByNode = OrderBy;
             foreach(var cursorSegment in cursorSegments) {
 
-                if (cursorSegment.ToLower() != orderByNode.GetCursorPrefix(cursorSubsegmentDelimiter).ToLower())
-                    return Expression.Lambda<Func<TSource, bool>>(Expression.Constant(true), Expression.Parameter(typeof(TSource)));
+                if (!cursorSegment.ToLower().StartsWith(orderByNode.GetCursorPrefix(cursorSubsegmentDelimiter).ToLower()))
+                    return Expression.Lambda<Func<TSource, bool>>(Expression.Constant(true), predicate.Parameters[0]);
 
                 string cursorFieldValue = cursorSegment.Split(new[] { cursorSubsegmentDelimiter }, StringSplitOptions.None)[2];
-                
-                predicate.And(
+
+                predicate = predicate.And(
                     Expression.Lambda<Func<TSource, bool>>(
                         GetBinaryExpression(
                             orderByNode.SortDirection,

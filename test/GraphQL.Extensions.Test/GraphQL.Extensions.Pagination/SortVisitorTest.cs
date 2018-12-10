@@ -6,7 +6,7 @@ using System.Reflection;
 using GraphQL.Extensions.Test;
 using Moq;
 using Xunit;
-using Xunit.Should;
+using Xunit2.Should;
 
 namespace GraphQL.Extensions.Pagination {
     public class SortVisitorTest {
