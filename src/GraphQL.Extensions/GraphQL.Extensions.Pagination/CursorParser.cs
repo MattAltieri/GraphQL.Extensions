@@ -1,3 +1,4 @@
+using GraphQL.Extensions.Internal;
 using LinqKit;
 using System;
 using System.Linq.Expressions;
@@ -73,17 +74,42 @@ namespace GraphQL.Extensions.Pagination {
         
         private BinaryExpression GetBinaryExpression(SortDirections direction, Expression left, Expression right) {
 
-            if (CursorFilterType == CursorFilterTypes.After)
-                if (direction == SortDirections.Ascending)
-                    return Expression.GreaterThan(left, right);
+            ParameterExpression stringParam = Expression.Parameter(typeof(string));
+            
+            if (left.Type == typeof(string) && right.Type == typeof(char))
+                left = Expression.Property(stringParam, "Item", Expression.Constant(0));
+            if (right.Type == typeof(string) && left.Type == typeof(char))
+                right = Expression.Property(stringParam, "Item", Expression.Constant(0));
+            
+            if (left.Type == typeof(string))
+                return GetBinaryExpression(
+                    direction,
+                    Expression.Call(right, CachedReflection.StringCompareTo(), left),
+                    Expression.Constant(0)
+                );
+            else if (left.Type == typeof(char))
+                return GetBinaryExpression(
+                    direction,
+                    Expression.Call(right, CachedReflection.CharCompareTo(), left),
+                    Expression.Constant(0)
+                );
+            else {
+                if (CursorFilterType == CursorFilterTypes.After)
+                    if (direction == SortDirections.Ascending) {
+                        return Expression.GreaterThan(left, right);
+                    } else {
+                        return Expression.LessThan(left, right);
+                    }
                 else
-                    return Expression.LessThan(left, right);
-            else
-                if (direction == SortDirections.Ascending)
-                    return Expression.LessThan(left, right);
-                else
-                    return Expression.GreaterThan(left, right);
+                    if (direction == SortDirections.Ascending)
+                        return Expression.LessThan(left, right);
+                    else
+                        return Expression.GreaterThan(left, right);
+            }
         }
+
+        private IndexExpression GetIndexerExpression(Expression instance, Expression index)
+            => Expression.Property(Expression.Parameter(instance.Type), "Item", index);
         
         private ConstantExpression GetConstantExpression(string value, Type type) {
 

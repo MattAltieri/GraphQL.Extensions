@@ -8,6 +8,7 @@ using Xunit;
 using Xunit2.Should;
 using System.Linq;
 using System.Reflection;
+using GraphQL.Extensions.Internal;
 
 namespace GraphQL.Extensions.Pagination {
     public class CursorParserTest {
@@ -87,7 +88,9 @@ namespace GraphQL.Extensions.Pagination {
         }
 
         [Theory]
-        [MemberData(nameof(GetCursorTestData))]
+        // [MemberData(nameof(GetCursorTestData_Single))]
+        [MemberData(nameof(GetCursorTestData_Double))]
+        // [MemberData(nameof(GetCursorTestData_Triple))]
         public void Should_CreateExpressionTree_When_ParsingCursor(
             string cursorValue,
             CursorFilterTypes cursorFilterType,
@@ -167,7 +170,7 @@ namespace GraphQL.Extensions.Pagination {
             return mock.Object;
         }
 
-        public static List<object[]> GetCursorTestData
+        public static List<object[]> GetCursorTestData_Single
             => new List<object[]> {
                 new object[] {
                     "id::a::3000",
@@ -308,11 +311,2247 @@ namespace GraphQL.Extensions.Pagination {
                         Expression.AndAlso(
                             Expression.Constant(true),
                             Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
                                 Expression.MakeMemberAccess(
                                     parameterExpression,
-                                    typeof(MockEntity).GetMember("Name")[0]
+                                    typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant("Matt")
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = null,
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.Constant(true),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+            };
+
+        public static List<object[]> GetCursorTestData_Double
+            => new List<object[]> {
+                new object[] {
+                    "id::a::3000//name::a::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        },
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//name::a::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//name::a::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//name::a::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//name::d::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//name::d::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//name::d::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//name::d::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//dob::a::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//dob::a::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//dob::d::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::3000//dob::d::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//dob::d::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::3000//dob::d::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("Id")[0]
+                                    ),
+                                    Expression.Constant(3000)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//dob::a::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//dob::a::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//dob::d::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//dob::d::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//dob::d::624910464000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "DOB",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//id::a::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//id::a::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//id::a::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//id::a::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//id::d::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::a::Matt//id::d::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//id::d::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "name::d::Matt//id::d::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Name",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//id::a::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//id::a::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//id::a::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//id::a::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//id::d::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//id::d::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//id::d::3000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//id::d::3000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Id",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("Id")[0]
+                                ),
+                                Expression.Constant(3000)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//name::a::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//name::a::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//name::a::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//name::a::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//name::d::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::a::624910464000000000//name::d::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//name::d::Matt",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.LessThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "dob::d::624910464000000000//name::d::Matt",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "DOB",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = null,
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.Constant(true),
+                                Expression.GreaterThan(
+                                    Expression.MakeMemberAccess(
+                                        parameterExpression,
+                                        typeof(MockEntity).GetMember("DOB")[0]
+                                    ),
+                                    Expression.Constant(new DateTime(624910464000000000))
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.Call(
+                                    Expression.Constant("Matt"),
+                                    CachedReflection.StringCompareTo(),
+                                    new Expression[] {
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Name")[0]
+                                        )
+                                    }
+                                ),
+                                Expression.Constant(0)
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+            };
+
+        public static List<object[]> GetCursorTestData_Triple
+            => new List<object[]> {
+                new object[] {
+                    "id::a::3000//name::a::Matt//dob::a::624910464000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(3000)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("Matt"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(624910464000000000))
                             )
                         ),
                         parameterExpression
