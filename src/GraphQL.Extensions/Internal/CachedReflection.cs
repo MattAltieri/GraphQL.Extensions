@@ -180,7 +180,7 @@ namespace GraphQL.Extensions.Internal {
         
         public static MethodInfo StringCompareTo()
             => (s_StringCompareTo ??
-               (s_StringCompareTo = typeof(string).GetMethods(BindingFlags.Public | BindingFlags.Static)
+               (s_StringCompareTo = typeof(string).GetMethods(BindingFlags.Public | BindingFlags.Instance)
                     .Where(m => m.Name == "CompareTo")
                     .Where(m => m.GetParameters()[0].ParameterType == typeof(string))
                     .First()));

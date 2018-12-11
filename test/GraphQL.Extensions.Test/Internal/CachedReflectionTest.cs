@@ -650,7 +650,7 @@ namespace GraphQL.Extensions.Internal {
         }
 
         [Fact]
-        public void Should_GenerateDateTimeTicksProperty_When_DateTimeticksCalled() {
+        public void Should_GenerateDateTimeTicksProperty_When_DateTimeTicksCalled() {
 
             Exception exception = Record.Exception(() => systemUnderTest_Property = CachedReflection.DateTimeTicks());
             exception.ShouldBeNull();
@@ -664,6 +664,29 @@ namespace GraphQL.Extensions.Internal {
             result.HasValue.ShouldBeTrue();
 
             result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateStringCompareToMethod_When_StringCompareToCalled() {
+
+            string first = "AAAAA", second = "BBBBB", third = "CCCCC";
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.StringCompareTo());
+            exception.ShouldBeNull();
+            
+            int? result = null;
+            exception = Record.Exception(() => result = (int)systemUnderTest_Method.Invoke(second, new object[] { first }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBeGreaterThan(0);
+
+            result = null;
+            exception = Record.Exception(() => result = (int)systemUnderTest_Method.Invoke(second, new object[] { third }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBeLessThan(0);
         }
 
         public static List<object[]> GetOrderByTestData
