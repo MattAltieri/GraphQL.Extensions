@@ -184,8 +184,15 @@ namespace GraphQL.Extensions.Internal {
                     .Where(m => m.Name == "CompareTo")
                     .Where(m => m.GetParameters()[0].ParameterType == typeof(string))
                     .First()));
+                    
+        private static MethodInfo s_CharCompareTo;
 
-        // TODO: write test case
+        public static MethodInfo CharCompareTo()
+            => (s_CharCompareTo ??
+               (s_CharCompareTo = typeof(char).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(m => m.Name == "CompareTo")
+                    .Where(m => m.GetParameters()[0].ParameterType == typeof(char))
+                    .First()));
 
         private static IEnumerable<Type> PrimitiveTypes
             => new List<Type> {

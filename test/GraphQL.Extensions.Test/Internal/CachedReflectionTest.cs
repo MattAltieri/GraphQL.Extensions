@@ -688,6 +688,29 @@ namespace GraphQL.Extensions.Internal {
 
             result.Value.ShouldBeLessThan(0);
         }
+        
+        [Fact]
+        public void Should_GenerateCharCompareToMethod_When_StringCompareToCalled() {
+
+            char first = 'A', second = 'B', third = 'C';
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.CharCompareTo());
+            exception.ShouldBeNull();
+
+            int? result = null;
+            exception = Record.Exception(() => result = (int)systemUnderTest_Method.Invoke(second, new object[] { first }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBeGreaterThan(0);
+
+            result = null;
+            exception = Record.Exception(() => result = (int)systemUnderTest_Method.Invoke(second, new object[] { third }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBeLessThan(0);
+        }
 
         public static List<object[]> GetOrderByTestData
             => new List<object[]> {
