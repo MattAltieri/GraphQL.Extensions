@@ -189,7 +189,7 @@ namespace GraphQL.Extensions.Pagination {
             return mock.Object;
         }
 
-        public static List<object[]> GetSingleSortTestData()
+        public static List<object[]> GetSingleSortTestData
             => new List<object[]> {
                 new object[] {
                     "Id",

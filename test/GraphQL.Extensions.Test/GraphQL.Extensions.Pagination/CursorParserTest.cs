@@ -88,9 +88,9 @@ namespace GraphQL.Extensions.Pagination {
         }
 
         [Theory]
-        // [MemberData(nameof(GetCursorTestData_Single))]
+        [MemberData(nameof(GetCursorTestData_Single))]
         [MemberData(nameof(GetCursorTestData_Double))]
-        // [MemberData(nameof(GetCursorTestData_Triple))]
+        [MemberData(nameof(GetCursorTestData_Triple))]
         public void Should_CreateExpressionTree_When_ParsingCursor(
             string cursorValue,
             CursorFilterTypes cursorFilterType,
@@ -173,7 +173,7 @@ namespace GraphQL.Extensions.Pagination {
         public static List<object[]> GetCursorTestData_Single
             => new List<object[]> {
                 new object[] {
-                    "id::a::3000",
+                    "id::a::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -190,7 +190,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -198,7 +198,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::4000",
+                    "id::a::1",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -215,7 +215,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(4000)
+                                Expression.Constant(1)
                             )
                         ),
                         parameterExpression
@@ -223,7 +223,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000",
+                    "id::a::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -240,7 +240,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -248,7 +248,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000",
+                    "id::d::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -265,7 +265,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -273,7 +273,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000",
+                    "id::d::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -290,7 +290,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -298,7 +298,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt",
+                    "name::a::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -312,7 +312,7 @@ namespace GraphQL.Extensions.Pagination {
                             Expression.Constant(true),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -329,7 +329,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt",
+                    "name::d::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -343,7 +343,7 @@ namespace GraphQL.Extensions.Pagination {
                             Expression.Constant(true),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -360,7 +360,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt",
+                    "name::d::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -374,7 +374,7 @@ namespace GraphQL.Extensions.Pagination {
                             Expression.Constant(true),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -391,7 +391,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt",
+                    "name::a::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -405,7 +405,7 @@ namespace GraphQL.Extensions.Pagination {
                             Expression.Constant(true),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -422,7 +422,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000",
+                    "dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -439,7 +439,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -447,7 +447,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000",
+                    "dob::d::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -464,7 +464,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -472,7 +472,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000",
+                    "dob::d::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -489,7 +489,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -497,7 +497,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000",
+                    "dob::a::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -514,7 +514,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -526,7 +526,7 @@ namespace GraphQL.Extensions.Pagination {
         public static List<object[]> GetCursorTestData_Double
             => new List<object[]> {
                 new object[] {
-                    "id::a::3000//name::a::Matt",
+                    "id::a::2//name::a::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -548,12 +548,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -570,7 +570,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//name::a::Matt",
+                    "id::a::2//name::a::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -592,12 +592,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -614,7 +614,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//name::a::Matt",
+                    "id::d::2//name::a::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -636,12 +636,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -658,7 +658,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//name::a::Matt",
+                    "id::d::2//name::a::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -680,12 +680,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -702,7 +702,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//name::d::Matt",
+                    "id::a::2//name::d::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -724,12 +724,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -746,7 +746,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//name::d::Matt",
+                    "id::a::2//name::d::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -768,12 +768,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -790,7 +790,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//name::d::Matt",
+                    "id::d::2//name::d::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -812,12 +812,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -834,7 +834,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//name::d::Matt",
+                    "id::d::2//name::d::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -856,12 +856,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -878,7 +878,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//dob::a::624910464000000000",
+                    "id::a::2//dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -900,7 +900,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
@@ -908,7 +908,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -916,7 +916,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//dob::a::624910464000000000",
+                    "id::a::2//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -938,7 +938,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
@@ -946,7 +946,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -954,7 +954,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//dob::a::624910464000000000",
+                    "id::d::2//dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -976,7 +976,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
@@ -984,7 +984,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -992,7 +992,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//dob::a::624910464000000000",
+                    "id::d::2//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1014,7 +1014,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
@@ -1022,7 +1022,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1030,7 +1030,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//dob::d::624910464000000000",
+                    "id::a::2//dob::d::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1052,7 +1052,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
@@ -1060,7 +1060,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1068,7 +1068,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::a::3000//dob::d::624910464000000000",
+                    "id::a::2//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1090,7 +1090,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
@@ -1098,7 +1098,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1106,7 +1106,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//dob::d::624910464000000000",
+                    "id::d::2//dob::d::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1128,7 +1128,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.LessThan(
@@ -1136,7 +1136,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1144,7 +1144,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "id::d::3000//dob::d::624910464000000000",
+                    "id::d::2//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1166,7 +1166,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("Id")[0]
                                     ),
-                                    Expression.Constant(3000)
+                                    Expression.Constant(2)
                                 )
                             ),
                             Expression.GreaterThan(
@@ -1174,7 +1174,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1182,7 +1182,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//dob::a::624910464000000000",
+                    "name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1201,7 +1201,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1218,7 +1218,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1226,7 +1226,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//dob::a::624910464000000000",
+                    "name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1245,7 +1245,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1262,7 +1262,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1270,7 +1270,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//dob::a::624910464000000000",
+                    "name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1289,7 +1289,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1306,7 +1306,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1314,7 +1314,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//dob::a::624910464000000000",
+                    "name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1333,7 +1333,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1350,7 +1350,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1358,7 +1358,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//dob::d::624910464000000000",
+                    "name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1377,7 +1377,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1394,7 +1394,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1402,7 +1402,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//dob::d::624910464000000000",
+                    "name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1421,7 +1421,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1438,7 +1438,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1446,7 +1446,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//dob::d::624910464000000000",
+                    "name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1465,7 +1465,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1482,7 +1482,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -1490,7 +1490,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//id::a::3000",
+                    "name::a::B//id::a::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1509,7 +1509,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1526,7 +1526,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1534,7 +1534,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//id::a::3000",
+                    "name::a::B//id::a::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1553,7 +1553,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1570,7 +1570,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1578,7 +1578,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//id::a::3000",
+                    "name::d::B//id::a::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1597,7 +1597,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1614,7 +1614,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1622,7 +1622,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//id::a::3000",
+                    "name::d::B//id::a::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1641,7 +1641,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1658,7 +1658,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1666,7 +1666,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//id::d::3000",
+                    "name::a::B//id::d::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1685,7 +1685,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1702,7 +1702,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1710,7 +1710,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::a::Matt//id::d::3000",
+                    "name::a::B//id::d::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1729,7 +1729,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1746,7 +1746,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1754,7 +1754,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//id::d::3000",
+                    "name::d::B//id::d::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1773,7 +1773,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.LessThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1790,7 +1790,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1798,7 +1798,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "name::d::Matt//id::d::3000",
+                    "name::d::B//id::d::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1817,7 +1817,7 @@ namespace GraphQL.Extensions.Pagination {
                                 Expression.Constant(true),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -1834,7 +1834,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1842,7 +1842,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//id::a::3000",
+                    "dob::a::625225824000000000//id::a::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1864,7 +1864,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
@@ -1872,7 +1872,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1880,7 +1880,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//id::a::3000",
+                    "dob::a::625225824000000000//id::a::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1902,7 +1902,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
@@ -1910,7 +1910,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1918,7 +1918,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//id::a::3000",
+                    "dob::d::625225824000000000//id::a::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -1940,7 +1940,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
@@ -1948,7 +1948,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1956,7 +1956,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//id::a::3000",
+                    "dob::d::625225824000000000//id::a::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -1978,7 +1978,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
@@ -1986,7 +1986,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -1994,7 +1994,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//id::d::3000",
+                    "dob::a::625225824000000000//id::d::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2016,7 +2016,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
@@ -2024,7 +2024,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -2032,7 +2032,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//id::d::3000",
+                    "dob::a::625225824000000000//id::d::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2054,7 +2054,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
@@ -2062,7 +2062,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -2070,7 +2070,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//id::d::3000",
+                    "dob::d::625225824000000000//id::d::2",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2092,7 +2092,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
@@ -2100,7 +2100,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -2108,7 +2108,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//id::d::3000",
+                    "dob::d::625225824000000000//id::d::2",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2130,7 +2130,7 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
@@ -2138,7 +2138,7 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("Id")[0]
                                 ),
-                                Expression.Constant(3000)
+                                Expression.Constant(2)
                             )
                         ),
                         parameterExpression
@@ -2146,7 +2146,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//name::a::Matt",
+                    "dob::a::625225824000000000//name::a::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2168,12 +2168,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2190,7 +2190,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//name::a::Matt",
+                    "dob::a::625225824000000000//name::a::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2212,12 +2212,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2234,7 +2234,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//name::a::Matt",
+                    "dob::d::625225824000000000//name::a::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2256,12 +2256,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2278,7 +2278,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//name::a::Matt",
+                    "dob::d::625225824000000000//name::a::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2300,12 +2300,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2322,7 +2322,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//name::d::Matt",
+                    "dob::a::625225824000000000//name::d::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2344,12 +2344,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2366,7 +2366,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::a::624910464000000000//name::d::Matt",
+                    "dob::a::625225824000000000//name::d::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2388,12 +2388,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2410,7 +2410,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//name::d::Matt",
+                    "dob::d::625225824000000000//name::d::B",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2432,12 +2432,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.LessThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2454,7 +2454,7 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
                 new object[] {
-                    "dob::d::624910464000000000//name::d::Matt",
+                    "dob::d::625225824000000000//name::d::B",
                     CursorFilterTypes.Before,
                     "//",
                     "::",
@@ -2476,12 +2476,12 @@ namespace GraphQL.Extensions.Pagination {
                                         parameterExpression,
                                         typeof(MockEntity).GetMember("DOB")[0]
                                     ),
-                                    Expression.Constant(new DateTime(624910464000000000))
+                                    Expression.Constant(new DateTime(625225824000000000))
                                 )
                             ),
                             Expression.GreaterThan(
                                 Expression.Call(
-                                    Expression.Constant("Matt"),
+                                    Expression.Constant("B"),
                                     CachedReflection.StringCompareTo(),
                                     new Expression[] {
                                         Expression.MakeMemberAccess(
@@ -2502,7 +2502,7 @@ namespace GraphQL.Extensions.Pagination {
         public static List<object[]> GetCursorTestData_Triple
             => new List<object[]> {
                 new object[] {
-                    "id::a::3000//name::a::Matt//dob::a::624910464000000000",
+                    "id::a::2//name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
                     "//",
                     "::",
@@ -2529,12 +2529,12 @@ namespace GraphQL.Extensions.Pagination {
                                             parameterExpression,
                                             typeof(MockEntity).GetMember("Id")[0]
                                         ),
-                                        Expression.Constant(3000)
+                                        Expression.Constant(2)
                                     )
                                 ),
                                 Expression.GreaterThan(
                                     Expression.Call(
-                                        Expression.Constant("Matt"),
+                                        Expression.Constant("B"),
                                         CachedReflection.StringCompareTo(),
                                         new Expression[] {
                                             Expression.MakeMemberAccess(
@@ -2551,7 +2551,862 @@ namespace GraphQL.Extensions.Pagination {
                                     parameterExpression,
                                     typeof(MockEntity).GetMember("DOB")[0]
                                 ),
-                                Expression.Constant(new DateTime(624910464000000000))
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::a::B//dob::a::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::a::B//dob::a::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::a::B//dob::a::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::d::B//dob::a::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::d::B//dob::a::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::a::B//dob::d::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::a::B//dob::d::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::d::B//dob::a::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::d::B//dob::a::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Ascending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::a::B//dob::d::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::a::B//dob::d::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Ascending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::d::B//dob::d::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::a::2//name::d::B//dob::d::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Ascending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::d::B//dob::d::625225824000000000",
+                    CursorFilterTypes.After,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.LessThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.LessThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.LessThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
+                            )
+                        ),
+                        parameterExpression
+                    ),
+                    true,
+                },
+                new object[] {
+                    "id::d::2//name::d::B//dob::d::625225824000000000",
+                    CursorFilterTypes.Before,
+                    "//",
+                    "::",
+                    new OrderByInfo<MockEntity> {
+                        ColumnName = "Id",
+                        SortDirection = SortDirections.Descending,
+                        ThenBy = new ThenByInfo<MockEntity> {
+                            ColumnName = "Name",
+                            SortDirection = SortDirections.Descending,
+                            ThenBy = new ThenByInfo<MockEntity> {
+                                ColumnName = "DOB",
+                                SortDirection = SortDirections.Descending,
+                                ThenBy = null,
+                            }
+                        }
+                    },
+                    Expression.Lambda<Func<MockEntity, bool>>(
+                        Expression.AndAlso(
+                            Expression.AndAlso(
+                                Expression.AndAlso(
+                                    Expression.Constant(true),
+                                    Expression.GreaterThan(
+                                        Expression.MakeMemberAccess(
+                                            parameterExpression,
+                                            typeof(MockEntity).GetMember("Id")[0]
+                                        ),
+                                        Expression.Constant(2)
+                                    )
+                                ),
+                                Expression.GreaterThan(
+                                    Expression.Call(
+                                        Expression.Constant("B"),
+                                        CachedReflection.StringCompareTo(),
+                                        new Expression[] {
+                                            Expression.MakeMemberAccess(
+                                                parameterExpression,
+                                                typeof(MockEntity).GetMember("Name")[0]
+                                            )
+                                        }
+                                    ),
+                                    Expression.Constant(0)
+                                )
+                            ),
+                            Expression.GreaterThan(
+                                Expression.MakeMemberAccess(
+                                    parameterExpression,
+                                    typeof(MockEntity).GetMember("DOB")[0]
+                                ),
+                                Expression.Constant(new DateTime(625225824000000000))
                             )
                         ),
                         parameterExpression
@@ -2559,5 +3414,23 @@ namespace GraphQL.Extensions.Pagination {
                     true,
                 },
             };
+    
+        private static List<MockEntity> testData_SingleSort = new List<MockEntity> {
+            new MockEntity {
+                Id = 1,
+                Name = "A",
+                DOB = DateTime.Parse("1981-04-07"),
+            },
+            new MockEntity {
+                Id = 2,
+                Name = "B",
+                DOB = DateTime.Parse("1982-04-07"),
+            },
+            new MockEntity {
+                Id = 3,
+                Name = "C",
+                DOB = DateTime.Parse("1983-04-07"),
+            },
+        };
     }
 }
