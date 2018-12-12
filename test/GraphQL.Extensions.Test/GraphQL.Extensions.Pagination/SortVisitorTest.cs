@@ -26,7 +26,7 @@ namespace GraphQL.Extensions.Pagination {
 
             IOrderedQueryable<MockEntity> results = null;
             OrderByInfo<MockEntity> orderBy =
-                TestHelpers.MakeOrderByInfo<MockEntity, MockEntity>(parameterExpression, columnName, sortDirection, null,
+                TestHelpers.MakeOrderByInfo<MockEntity>(parameterExpression, columnName, sortDirection, null,
                 sortVisitor: systemUnderTest);
             Exception exception = Record.Exception(() => results = systemUnderTest.Visit(orderBy));
             exception.ShouldBeNull();
@@ -52,7 +52,7 @@ namespace GraphQL.Extensions.Pagination {
 
             IOrderedQueryable<MockEntity> results = null;
             ThenByInfo<MockEntity> thenBy =
-                TestHelpers.MakeThenByInfo<MockEntity, MockEntity>(parameterExpression, columnName, sortDirection, null,
+                TestHelpers.MakeThenByInfo<MockEntity>(parameterExpression, columnName, sortDirection, null,
                 sortVisitor: systemUnderTest);
             Exception exception = Record.Exception(() => results = systemUnderTest.Visit(thenBy));
             exception.ShouldBeNull();
@@ -80,7 +80,7 @@ namespace GraphQL.Extensions.Pagination {
 
             IOrderedQueryable<MockEntity> results = null;
             ThenByInfo<MockEntity> thenBy =
-                TestHelpers.MakeThenByInfo<MockEntity, MockEntity>(parameterExpression, columnName, sortDirection, null,
+                TestHelpers.MakeThenByInfo<MockEntity>(parameterExpression, columnName, sortDirection, null,
                 sortVisitor: systemUnderTest);
             Exception exception = Record.Exception(() => results = systemUnderTest.Visit(thenBy));
             exception.ShouldBeNull();
@@ -99,10 +99,10 @@ namespace GraphQL.Extensions.Pagination {
             systemUnderTest = new SortVisitor<MockEntity>(TestHelpers.TestData_DoubleSort.AsQueryable(), parameterExpression);
 
             ThenByInfo<MockEntity> thenBy =
-                TestHelpers.MakeThenByInfo<MockEntity, MockEntity>(parameterExpression, sortDetails.ElementAt(1).Key,
+                TestHelpers.MakeThenByInfo<MockEntity>(parameterExpression, sortDetails.ElementAt(1).Key,
                 sortDetails.ElementAt(1).Value, null, sortVisitor: systemUnderTest);
             OrderByInfo<MockEntity> orderBy =
-                TestHelpers.MakeOrderByInfo<MockEntity, MockEntity>(parameterExpression, sortDetails.ElementAt(0).Key,
+                TestHelpers.MakeOrderByInfo<MockEntity>(parameterExpression, sortDetails.ElementAt(0).Key,
                 sortDetails.ElementAt(0).Value, thenBy, sortVisitor: systemUnderTest);
             
             IOrderedQueryable<MockEntity> results = null;
@@ -128,13 +128,13 @@ namespace GraphQL.Extensions.Pagination {
             systemUnderTest = new SortVisitor<MockEntity>(TestHelpers.TestData_TripleSort.AsQueryable(), parameterExpression);
 
             ThenByInfo<MockEntity> thenBy_level2 =
-                TestHelpers.MakeThenByInfo<MockEntity, MockEntity>(parameterExpression, sortDetails.ElementAt(2).Key,
+                TestHelpers.MakeThenByInfo<MockEntity>(parameterExpression, sortDetails.ElementAt(2).Key,
                 sortDetails.ElementAt(2).Value, null, sortVisitor: systemUnderTest);
             ThenByInfo<MockEntity> thenBy_level1 =
-                TestHelpers.MakeThenByInfo<MockEntity, MockEntity>(parameterExpression, sortDetails.ElementAt(1).Key,
+                TestHelpers.MakeThenByInfo<MockEntity>(parameterExpression, sortDetails.ElementAt(1).Key,
                 sortDetails.ElementAt(1).Value, thenBy_level2, sortVisitor: systemUnderTest);
             OrderByInfo<MockEntity> orderBy =
-                TestHelpers.MakeOrderByInfo<MockEntity, MockEntity>(parameterExpression, sortDetails.ElementAt(0).Key,
+                TestHelpers.MakeOrderByInfo<MockEntity>(parameterExpression, sortDetails.ElementAt(0).Key,
                 sortDetails.ElementAt(0).Value, thenBy_level1, sortVisitor: systemUnderTest);
 
             IOrderedQueryable<MockEntity> results = null;
