@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Extensions\GraphQL.Extensions.csproj" />
-    <ProjectReference Include="..\..\src\LinqExpressionComparison\LinqExpressionComparison.csproj" />
   </ItemGroup>
 
 </Project>
