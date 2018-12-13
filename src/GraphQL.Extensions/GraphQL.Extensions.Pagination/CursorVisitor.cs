@@ -16,33 +16,31 @@ namespace GraphQL.Extensions.Pagination {
         public virtual string CursorSubsegmentDelimiter { get; protected set; }
         public virtual int Index { get; protected set; }
 
-        public CursorVisitor() => Index = 0;
-
-        public CursorVisitor(CursorVisitor<TSource, TResult> visitor)
-            /* : this() */  {
+        public CursorVisitor(CursorVisitor<TSource, TResult> visitor){
             
             Parameter = visitor.Parameter;
             CursorSegmentDelimiter = visitor.CursorSegmentDelimiter;
             CursorSubsegmentDelimiter = visitor.CursorSubsegmentDelimiter;
         }
 
-        public CursorVisitor(ParameterExpression param, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter)
-            /* : this() */ {
+        public CursorVisitor(ParameterExpression param, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter) {
             
             Parameter = param;
             CursorSegmentDelimiter = cursorSegmentDelimiter;
-            CursorSubsegmentDelimiter = CursorSubsegmentDelimiter;
+            CursorSubsegmentDelimiter = cursorSubsegmentDelimiter;
         }
 
         public virtual Cursor Visit(OrderByInfo<TSource> orderBy) {
+
+            Index = 0;
 
             Type type = orderBy.GetMemberType();
             MemberExpression memberExpression = orderBy.GetMemberExpression(Parameter);
             
             Cursor cursor = new Cursor();
-            cursor.CursorFormatString.Append(orderBy.SortDirection == SortDirections.Ascending ? "a" : "d");
-            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append(orderBy.ColumnName.ToLower().ToString());
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append(orderBy.SortDirection == SortDirections.Ascending ? "a" : "d");
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append($"{{{Index.ToString()}}}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
@@ -65,9 +63,9 @@ namespace GraphQL.Extensions.Pagination {
             MemberExpression memberExpression = thenBy.GetMemberExpression(Parameter);
 
             Cursor cursor = new Cursor();
-            cursor.CursorFormatString.Append(thenBy.SortDirection == SortDirections.Ascending ? "a" : "d");
-            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append(thenBy.ColumnName.ToLower().ToString());
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append(thenBy.SortDirection == SortDirections.Ascending ? "a" : "d");
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append($"{{{Index.ToString()}}}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));

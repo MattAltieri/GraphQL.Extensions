@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using GraphQL.Extensions.Test;
 using Xunit;
 using Xunit2.Should;
+using GraphQL.Extensions.Internal;
+using System.Text;
 
 namespace GraphQL.Extensions.Pagination {
     public class CursorVisitorTest {
@@ -222,11 +224,25 @@ namespace GraphQL.Extensions.Pagination {
         }
 
         [Theory]
-        [MemberData(nameof(GetVisitorTestData_Single_Nulls))]
+        [MemberData(nameof(GetVisitorTestData_Single))]
+        [MemberData(nameof(GetVisitorTestData_Double))]
+        [MemberData(nameof(GetVisitorTestData_Triple))]
         public void Should_GenerateCorrectCursor_When_VisitCalled(OrderByInfo<MockEntityForCursorVisitorTest> orderBy,
             MockEntityForCursorVisitorTest testData, Cursor expectedResult) {
             
-            ExpressionTreeComparer comparer = new ExpressionTreeComparer();
+            // This step is 100% dependent on the above tests passing. Any failures above mean that this step will yield incorrect results.
+            // There's not a good way to generate the list of expected expressions without relying on the methods w/i the visitor class
+            // unless we duplicate them in their entirity here. So this test assumes that they are working as intended, and then relies on them.
+            // Therefore, this test predominately is to ensure that the list itself is constructed correctly for a given orderBy clause.
+            expectedResult.CursorExpressions = new List<Expression>();
+            OrderByInfoBase<MockEntityForCursorVisitorTest> orderBySegment = orderBy;
+            do {
+                expectedResult.CursorExpressions.Add(systemUnderTest.GetCursorPart(
+                    orderBySegment.GetMemberType(),
+                    orderBySegment.GetMemberExpression(parameterExpression)
+                ));
+                orderBySegment = orderBySegment.ThenBy;
+            } while (orderBySegment != null);
             
             Cursor result = null;
             Exception exception = Record.Exception(() => result = systemUnderTest.Visit(orderBy));
@@ -235,6 +251,7 @@ namespace GraphQL.Extensions.Pagination {
 
             result.CursorFormatString.ToString().ShouldBe(expectedResult.CursorFormatString.ToString());
             
+            ExpressionTreeComparer comparer = new ExpressionTreeComparer();
             int i = 0;
             foreach (var item in result.CursorExpressions)
             {
@@ -495,20 +512,243 @@ namespace GraphQL.Extensions.Pagination {
                 },
             };
 
-        public static List<object[]> GetVisitorTestData_Single_Nulls
+        public static List<object[]> GetVisitorTestData_Single
             => new List<object[]> {
                 new object[] {
                     new OrderByInfo<MockEntityForCursorVisitorTest>("Char", SortDirections.Ascending),
                     testObject1,
-                    new Cursor {
-                        CursorFormatString = new System.Text.StringBuilder("char::a::{0}"),
-                        CursorExpressions = new List<Expression> {
-                            Expression.MakeMemberAccess(
-                                parameterExpression,
-                                typeof(MockEntityForCursorVisitorTest).GetMember("Char")[0]
-                            ),
-                        },
+                    new Cursor { CursorFormatString = new StringBuilder("char::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Char", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("char::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("CharNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("charnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("CharNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("charnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Short", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("short::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Short", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("short::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("int::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("int::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("IntNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("intnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("IntNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("intnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Long", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("long::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Long", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("long::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("LongNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("longnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("LongNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("longnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Decimal", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("decimal::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Decimal", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("decimal::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DecimalNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("decimalnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DecimalNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("decimalnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Float", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("float::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Float", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("float::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("FloatNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("floatnull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("FloatNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("floatnull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Double", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("double::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Double", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("double::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DoubleNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("doublenull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DoubleNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("doublenull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("datetime::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("datetime::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DateTimeNull", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("datetimenull::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("DateTimeNull", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("datetimenull::d::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("string::a::{0}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Descending),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("string::d::{0}") },
+                },
+            };
+
+            public static List<object[]> GetVisitorTestData_Double
+                => new List<object[]> {
+                    new object[] {
+                        new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending,
+                            new ThenByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Ascending)),
+                        testObject1,
+                        new Cursor { CursorFormatString = new StringBuilder("int::a::{0}//string::a::{1}") },
                     },
+                    new object[] {
+                        new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Descending,
+                            new ThenByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Ascending)),
+                        testObject1,
+                        new Cursor { CursorFormatString = new StringBuilder("int::d::{0}//string::a::{1}") },
+                    },
+                    new object[] {
+                        new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending,
+                            new ThenByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Descending)),
+                        testObject1,
+                        new Cursor { CursorFormatString = new StringBuilder("int::a::{0}//string::d::{1}") },
+                    },
+                    new object[] {
+                        new OrderByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Descending,
+                            new ThenByInfo<MockEntityForCursorVisitorTest>("String", SortDirections.Descending)),
+                        testObject1,
+                        new Cursor { CursorFormatString = new StringBuilder("int::d::{0}//string::d::{1}") },
+                    },
+                    new object[] {
+                        new OrderByInfo<MockEntityForCursorVisitorTest>("Char", SortDirections.Ascending,
+                            new ThenByInfo<MockEntityForCursorVisitorTest>("DateTimeNull", SortDirections.Descending)),
+                        testObject1,
+                        new Cursor { CursorFormatString = new StringBuilder("char::a::{0}//datetimenull::d::{1}") },
+                    },
+                };
+
+        public static List<object[]> GetVisitorTestData_Triple
+            => new List<object[]> {
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Ascending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Ascending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending))),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::a::{0}//datetime::a::{1}//int::a::{2}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Descending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Ascending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending))),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::d::{0}//datetime::a::{1}//int::a::{2}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Ascending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Descending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Ascending))),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::a::{0}//datetime::d::{1}//int::a::{2}") },
+                },
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("ShortNull", SortDirections.Descending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("DateTime", SortDirections.Ascending,
+                        new ThenByInfo<MockEntityForCursorVisitorTest>("Int", SortDirections.Descending))),
+                    testObject1,
+                    new Cursor { CursorFormatString = new StringBuilder("shortnull::d::{0}//datetime::a::{1}//int::d::{2}") },
                 },
             };
 
