@@ -10,20 +10,29 @@ namespace GraphQL.Extensions.Pagination {
     public class CursorVisitor<TSource, TResult>
         where TSource : class
         where TResult : class, new() {
-
         
         public virtual ParameterExpression Parameter { get; protected set; }
+        public virtual string CursorSegmentDelimiter { get; protected set; }
+        public virtual string CursorSubsegmentDelimiter { get; protected set; }
         public virtual int Index { get; protected set; }
 
         public CursorVisitor() => Index = 0;
 
         public CursorVisitor(CursorVisitor<TSource, TResult> visitor)
-            : this()
-            => Parameter = visitor.Parameter;
+            : this()  {
+            
+            Parameter = visitor.Parameter;
+            CursorSegmentDelimiter = visitor.CursorSegmentDelimiter;
+            CursorSubsegmentDelimiter = visitor.CursorSubsegmentDelimiter;
+        }
 
-        public CursorVisitor(ParameterExpression param)
-            : this()
-            => Parameter = param;
+        public CursorVisitor(ParameterExpression param, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter)
+            : this() {
+            
+            Parameter = param;
+            CursorSegmentDelimiter = cursorSegmentDelimiter;
+            CursorSubsegmentDelimiter = CursorSubsegmentDelimiter;
+        }
 
         public virtual Cursor Visit(OrderByInfo<TSource> orderBy) {
 
@@ -31,14 +40,19 @@ namespace GraphQL.Extensions.Pagination {
             MemberExpression memberExpression = orderBy.GetMemberExpression(Parameter);
             
             Cursor cursor = new Cursor();
-            cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{orderBy.SortDirection.ToString()}:{type.Name}");
+            // cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{orderBy.SortDirection.ToString()}:{type.Name}");
+            cursor.CursorFormatString.Append(orderBy.SortDirection == SortDirections.Ascending ? "a" : "d");
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append(orderBy.ColumnName.ToLower().ToString());
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append("{0}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
             Index++;
 
             if (orderBy.ThenBy != null) {
                 Cursor thenByCursor = orderBy.ThenBy.Accept<TResult>(this);
-                cursor.CursorFormatString.Append("/");
+                cursor.CursorFormatString.Append(CursorSegmentDelimiter);
                 cursor.CursorFormatString.Append(thenByCursor.CursorFormatString);
                 cursor.CursorExpressions.AddRange(thenByCursor.CursorExpressions);
             }
@@ -52,14 +66,19 @@ namespace GraphQL.Extensions.Pagination {
             MemberExpression memberExpression = thenBy.GetMemberExpression(Parameter);
 
             Cursor cursor = new Cursor();
-            cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{thenBy.SortDirection.ToString()}");
+            // cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{thenBy.SortDirection.ToString()}");
+            cursor.CursorFormatString.Append(thenBy.SortDirection == SortDirections.Ascending ? "a" : "d");
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append(thenBy.ColumnName.ToLower().ToString());
+            cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
+            cursor.CursorFormatString.Append("{0}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
             Index++;
 
             if (thenBy.ThenBy != null) {
                 Cursor thenByCursor = thenBy.ThenBy.Accept<TResult>(this);
-                cursor.CursorFormatString.Append("/");
+                cursor.CursorFormatString.Append(CursorSegmentDelimiter);
                 cursor.CursorFormatString.Append(thenByCursor.CursorFormatString);
                 cursor.CursorExpressions.AddRange(thenByCursor.CursorExpressions);
             }
@@ -67,7 +86,10 @@ namespace GraphQL.Extensions.Pagination {
             return cursor;
         }
 
-        private Expression GetCursorPart(Type type, MemberExpression memberExpression) {
+        protected virtual Expression GetCursorPart(Type type, MemberExpression memberExpression) {
+            
+            if (type == typeof(string))
+                return memberExpression;
 
             if (!type.IsValueType)
                 throw new ArgumentException($"{nameof(type)} is not a value type.");
@@ -79,21 +101,19 @@ namespace GraphQL.Extensions.Pagination {
                 return DateTimeCursorPart(memberExpression);
             else if (PrimitiveTypes.Contains(type))
                 return PrimitiveCursorPart(type, memberExpression);
-            else if (type == typeof(string))
-                return memberExpression;
             else
                 throw new ArgumentException($"{type.Name} is not a supported type.");
         }
 
-        private Expression DateTimeCursorPart(MemberExpression memberExpression) {
+        protected virtual Expression DateTimeCursorPart(MemberExpression memberExpression) {
             MemberExpression ticks = Expression.MakeMemberAccess(memberExpression, CachedReflection.DateTimeTicks());
             return PrimitiveCursorPart(typeof(long), ticks);
         }
 
-        private Expression PrimitiveCursorPart(Type type, MemberExpression memberExpression)
+        protected virtual Expression PrimitiveCursorPart(Type type, MemberExpression memberExpression)
             => Expression.Call(memberExpression, CachedReflection.ToString(type));
 
-        private Expression NullableCursorPart(Type type, MemberExpression memberExpression) {
+        protected virtual Expression NullableCursorPart(Type type, MemberExpression memberExpression) {
 
             Type underlyingType = Nullable.GetUnderlyingType(type);
 
@@ -108,7 +128,7 @@ namespace GraphQL.Extensions.Pagination {
             else
                 throw new ArgumentException($"Underlying type of {nameof(type)} must be DateTime or primative.");
 
-            return Expression.Condition(Expression.Not(propertyHasValue), Expression.Constant(" "), methodCallExpression);
+            return Expression.Condition(Expression.Not(propertyHasValue), Expression.Constant("\0"), methodCallExpression);
         }
 
         private static IEnumerable<Type> PrimitiveTypes

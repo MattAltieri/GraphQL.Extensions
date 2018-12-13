@@ -1,26 +1,453 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using GraphQL.Extensions.Test;
-using Moq;
 using Xunit;
 using Xunit2.Should;
 
 namespace GraphQL.Extensions.Pagination {
     public class CursorVisitorTest {
         
-        private ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntity), "o");
+        private static ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntityForCursorVisitorTest), "f");
+        private static string cursorSegmentDelimiter = "//";
+        private static string cursorSubsegmentDelimiter = "::";
 
-        public static List<object[]> GetSingleSortTestData
+        private static TestCursorVisitor systemUnderTest = new TestCursorVisitor(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+
+        [Theory]
+        [MemberData(nameof(GetPrimitiveCursorPartTestData))]
+        public void Should_GenerateToStringMethodCallExpression_When_PrimitiveCursorPartCalled(Type type, string memberName,
+            MockEntityForCursorVisitorTest testData, string expectedResult) {
+            
+            Expression toStringMethodCallExpression = null;
+            Exception exception = Record.Exception(() =>
+                toStringMethodCallExpression = systemUnderTest.PrimitiveCursorPart(
+                    type,
+                    Expression.MakeMemberAccess(
+                        parameterExpression,
+                        typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0])
+                ));
+            exception.ShouldBeNull();
+            toStringMethodCallExpression.ShouldNotBeNull();
+            
+            string result = null;
+            exception = Record.Exception(() =>
+                result = (string)Expression.Lambda(toStringMethodCallExpression, parameterExpression).Compile().DynamicInvoke(testData));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetDateTimeCursorPartTestData))]
+        public void Should_GenerateTicksProperty_When_DateTimeCursorPartCalled(Type type, string memberName,
+            MockEntityForCursorVisitorTest testData, string expectedResult) {
+
+            expectedResult = testData.DateTime.Ticks.ToString();
+
+            Expression ticksToStringMethodCallExpression = null;
+            Exception exception = Record.Exception(() =>
+                ticksToStringMethodCallExpression = systemUnderTest.DateTimeCursorPart(
+                    Expression.MakeMemberAccess(
+                        parameterExpression,
+                        typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0]
+                    )
+                ));
+            exception.ShouldBeNull();
+            ticksToStringMethodCallExpression.ShouldNotBeNull();
+
+            string result = null;
+            exception = Record.Exception(() =>
+                result = (string)Expression.Lambda(ticksToStringMethodCallExpression, parameterExpression).Compile().DynamicInvoke(testData));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [InlineData(typeof(char), "Char")]
+        [InlineData(typeof(short), "Short")]
+        [InlineData(typeof(int), "Int")]
+        [InlineData(typeof(long), "Long")]
+        [InlineData(typeof(decimal), "Decimal")]
+        [InlineData(typeof(float), "Float")]
+        [InlineData(typeof(double), "Double")]
+        [InlineData(typeof(DateTime), "DateTime")]
+        public void Should_ThrowException_When_NonNullablePassedToNullableCursorPart(Type type, string memberName) {
+
+            Assert.Throws<ArgumentNullException>(() => systemUnderTest.NullableCursorPart(
+                type,
+                Expression.MakeMemberAccess(
+                    parameterExpression,
+                    typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0]
+                )
+            ));
+        }
+
+        [Theory]
+        [MemberData(nameof(GetNullableCursorPartTestData))]
+        public void Should_GenerateCorrectOutput_When_NullableCursorPartCalled(Type type, string memberName,
+            MockEntityForCursorVisitorTest testData, string expectedResult) {
+            
+            Expression toStringMethodCallExpression = null;
+            Exception exception = Record.Exception(() =>
+                toStringMethodCallExpression = systemUnderTest.NullableCursorPart(
+                    type,
+                    Expression.MakeMemberAccess(
+                        parameterExpression,
+                        typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0]
+                    )
+                ));
+            exception.ShouldBeNull();
+            toStringMethodCallExpression.ShouldNotBeNull();
+
+            string result = null;
+            exception = Record.Exception(() =>
+                result = (string)Expression.Lambda(toStringMethodCallExpression, parameterExpression).Compile().DynamicInvoke(testData));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetNullableCursorPartTestData_DateTime))]
+        public void Should_GenerateCorrectOutput_When_NullableCursorPartCalled_DateTime(Type type, string memberName,
+            MockEntityForCursorVisitorTest testData, string expectedResult) {
+
+            expectedResult = testData.DateTimeNull.HasValue
+                ? testData.DateTimeNull.Value.Ticks.ToString()
+                : "\0";
+
+            Expression toStringMethodCallExpression = null;
+            Exception exception = Record.Exception(() =>
+                toStringMethodCallExpression = systemUnderTest.NullableCursorPart(
+                    type,
+                    Expression.MakeMemberAccess(
+                        parameterExpression,
+                        typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0]
+                    )
+                ));
+            exception.ShouldBeNull();
+            toStringMethodCallExpression.ShouldNotBeNull();
+
+            string result = null;
+            exception = Record.Exception(() =>
+                result = (string)Expression.Lambda(toStringMethodCallExpression, parameterExpression).Compile().DynamicInvoke(testData));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetDateTimeCursorPartTestData))]
+        [MemberData(nameof(GetNullableCursorPartTestData))]
+        [MemberData(nameof(GetNullableCursorPartTestData_DateTime))]
+        [MemberData(nameof(GetPrimitiveCursorPartTestData))]
+        [MemberData(nameof(GetStringCursorPartTestData))]
+        public void Should_GenerateCorrectOutput_When_GetCursorPartCalled(Type type, string memberName,
+            MockEntityForCursorVisitorTest testData, string expectedResult) {
+            
+            if (type == typeof(DateTime))
+                expectedResult = testData.DateTime.Ticks.ToString();
+            else if (type == typeof(DateTime?))
+                expectedResult = testData.DateTimeNull.HasValue
+                    ? testData.DateTimeNull.Value.Ticks.ToString()
+                    : "\0";
+
+            Expression cursorMethodCallExpression = null;
+            Exception exception = Record.Exception(() =>
+                cursorMethodCallExpression = systemUnderTest.GetCursorPart(
+                    type,
+                    Expression.MakeMemberAccess(
+                        parameterExpression,
+                        typeof(MockEntityForCursorVisitorTest).GetMember(memberName)[0]
+                    )
+                ));
+            exception.ShouldBeNull();
+            cursorMethodCallExpression.ShouldNotBeNull();
+
+            string result = null;
+            exception = Record.Exception(() =>
+                result = (string)Expression.Lambda(cursorMethodCallExpression, parameterExpression).Compile().DynamicInvoke(testData));
+            exception.ShouldBeNull();
+            if (type != typeof(string))
+                result.ShouldNotBeNull();
+
+            result.ShouldBe(expectedResult);
+        }
+
+        public static List<object[]> GetPrimitiveCursorPartTestData
             => new List<object[]> {
                 new object[] {
-                    "Id",
-                    SortDirections.Ascending,
-                    "id::a::15",
-                    
-                }
+                    typeof(char),
+                    "Char",
+                    new MockEntityForCursorVisitorTest {
+                        Char = 'A',
+                    },
+                    "A",
+                },
+                new object[] {
+                    typeof(short),
+                    "Short",
+                    new MockEntityForCursorVisitorTest {
+                        Short = 5,
+                    },
+                    "5",
+                },
+                new object[] {
+                    typeof(int),
+                    "Int",
+                    new MockEntityForCursorVisitorTest {
+                        Int = 10,
+                    },
+                    "10",
+                },
+                new object[] {
+                    typeof(long),
+                    "Long",
+                    new MockEntityForCursorVisitorTest {
+                        Long = 15,
+                    },
+                    "15",
+                },
+                new object[] {
+                    typeof(decimal),
+                    "Decimal",
+                    new MockEntityForCursorVisitorTest {
+                        Decimal = 20.01M,
+                    },
+                    "20.01",
+                },
+                new object[] {
+                    typeof(float),
+                    "Float",
+                    new MockEntityForCursorVisitorTest {
+                        Float = 25.01F,
+                    },
+                    "25.01",
+                },
+                new object[] {
+                    typeof(double),
+                    "Double",
+                    new MockEntityForCursorVisitorTest {
+                        Double = 30.01,
+                    },
+                    "30.01",
+                },
             };
+
+        public static List<object[]> GetNullableCursorPartTestData
+            => new List<object[]> {
+                new object[] {
+                    typeof(char?),
+                    "CharNull",
+                    new MockEntityForCursorVisitorTest {
+                        CharNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(char?),
+                    "CharNull",
+                    new MockEntityForCursorVisitorTest {
+                        CharNull = 'A',
+                    },
+                    "A",
+                },
+                new object[] {
+                    typeof(short?),
+                    "ShortNull",
+                    new MockEntityForCursorVisitorTest {
+                        ShortNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(short?),
+                    "ShortNull",
+                    new MockEntityForCursorVisitorTest {
+                        ShortNull = 5,
+                    },
+                    "5",
+                },
+                new object[] {
+                    typeof(int?),
+                    "IntNull",
+                    new MockEntityForCursorVisitorTest {
+                        IntNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(int?),
+                    "IntNull",
+                    new MockEntityForCursorVisitorTest {
+                        IntNull = 10,
+                    },
+                    "10",
+                },
+                new object[] {
+                    typeof(long?),
+                    "LongNull",
+                    new MockEntityForCursorVisitorTest {
+                        LongNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(long?),
+                    "LongNull",
+                    new MockEntityForCursorVisitorTest {
+                        LongNull = 15,
+                    },
+                    "15",
+                },
+                new object[] {
+                    typeof(decimal?),
+                    "DecimalNull",
+                    new MockEntityForCursorVisitorTest {
+                        DecimalNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(decimal?),
+                    "DecimalNull",
+                    new MockEntityForCursorVisitorTest {
+                        DecimalNull = 20.01M,
+                    },
+                    "20.01",
+                },
+                new object[] {
+                    typeof(float?),
+                    "FloatNull",
+                    new MockEntityForCursorVisitorTest {
+                        FloatNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(float?),
+                    "FloatNull",
+                    new MockEntityForCursorVisitorTest {
+                        FloatNull = 25.01F,
+                    },
+                    "25.01",
+                },
+                new object[] {
+                    typeof(double?),
+                    "DoubleNull",
+                    new MockEntityForCursorVisitorTest {
+                        DoubleNull = null,
+                    },
+                    "\0",
+                },
+                new object[] {
+                    typeof(double?),
+                    "DoubleNull",
+                    new MockEntityForCursorVisitorTest {
+                        DoubleNull = 30.01,
+                    },
+                    "30.01",
+                },
+            };
+
+        public static List<object[]> GetNullableCursorPartTestData_DateTime
+            => new List<object[]> {
+                new object[] {
+                    typeof(DateTime?),
+                    "DateTimeNull",
+                    new MockEntityForCursorVisitorTest {
+                        DateTimeNull = null,
+                    },
+                    null,
+                },
+                new object[] {
+                    typeof(DateTime?),
+                    "DateTimeNull",
+                    new MockEntityForCursorVisitorTest {
+                        DateTimeNull = DateTime.Now,
+                    },
+                    null,
+                },
+            };
+
+        public static List<object[]> GetDateTimeCursorPartTestData
+            => new List<object[]> {
+                new object[] {
+                    typeof(DateTime),
+                    "DateTime",
+                    new MockEntityForCursorVisitorTest {
+                        DateTime = DateTime.Now,
+                    },
+                    null,
+                },
+            };
+
+        public static List<object[]> GetStringCursorPartTestData
+            => new List<object[]> {
+                new object[] {
+                    typeof(string),
+                    "String",
+                    new MockEntityForCursorVisitorTest {
+                        String = null,
+                    },
+                    null,
+                },
+                new object[] {
+                    typeof(string),
+                    "String",
+                    new MockEntityForCursorVisitorTest {
+                        String = "",
+                    },
+                    "",
+                },
+                new object[] {
+                    typeof(string),
+                    "String",
+                    new MockEntityForCursorVisitorTest {
+                        String = " ",
+                    },
+                    " ",
+                },
+                new object[] {
+                    typeof(string),
+                    "String",
+                    new MockEntityForCursorVisitorTest {
+                        String = "  ",
+                    },
+                    "  ",
+                },
+                new object[] {
+                    typeof(string),
+                    "String",
+                    new MockEntityForCursorVisitorTest {
+                        String = "abc",
+                    },
+                    "abc",
+                },
+            };
+
+        private class TestCursorVisitor : CursorVisitor<MockEntityForCursorVisitorTest, MockEntityForCursorVisitorTest> {
+
+            public TestCursorVisitor(ParameterExpression parameterExpression, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter)
+                : base(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter) { }
+
+            public new Expression NullableCursorPart(Type type, MemberExpression memberExpression)
+                => base.NullableCursorPart(type, memberExpression);
+
+            public new Expression PrimitiveCursorPart(Type type, MemberExpression memberExpression)
+                => base.PrimitiveCursorPart(type, memberExpression);
+            
+            public new Expression DateTimeCursorPart(MemberExpression memberExpression)
+                => base.DateTimeCursorPart(memberExpression);
+
+            public new Expression GetCursorPart(Type type, MemberExpression memberExpression)
+                => base.GetCursorPart(type, memberExpression);
+        }
     }
 }
