@@ -14,12 +14,12 @@ namespace GraphQL.Extensions.Pagination {
         public virtual ParameterExpression Parameter { get; protected set; }
         public virtual string CursorSegmentDelimiter { get; protected set; }
         public virtual string CursorSubsegmentDelimiter { get; protected set; }
-        public virtual int Index { get; protected set; }
+        // public virtual int Index { get; protected set; }
 
-        public CursorVisitor() => Index = 0;
+        // public CursorVisitor() => Index = 0;
 
         public CursorVisitor(CursorVisitor<TSource, TResult> visitor)
-            : this()  {
+            /* : this() */  {
             
             Parameter = visitor.Parameter;
             CursorSegmentDelimiter = visitor.CursorSegmentDelimiter;
@@ -27,7 +27,7 @@ namespace GraphQL.Extensions.Pagination {
         }
 
         public CursorVisitor(ParameterExpression param, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter)
-            : this() {
+            /* : this() */ {
             
             Parameter = param;
             CursorSegmentDelimiter = cursorSegmentDelimiter;
@@ -48,7 +48,7 @@ namespace GraphQL.Extensions.Pagination {
             cursor.CursorFormatString.Append("{0}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
-            Index++;
+            // Index++;
 
             if (orderBy.ThenBy != null) {
                 Cursor thenByCursor = orderBy.ThenBy.Accept<TResult>(this);
@@ -74,7 +74,7 @@ namespace GraphQL.Extensions.Pagination {
             cursor.CursorFormatString.Append("{0}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
-            Index++;
+            // Index++;
 
             if (thenBy.ThenBy != null) {
                 Cursor thenByCursor = thenBy.ThenBy.Accept<TResult>(this);

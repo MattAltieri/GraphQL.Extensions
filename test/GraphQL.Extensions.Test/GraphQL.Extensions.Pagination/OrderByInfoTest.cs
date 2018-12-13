@@ -38,7 +38,7 @@ namespace GraphQL.Extensions.Pagination {
             mockSortVisitor.Setup(o => o.Visit(It.IsAny<OrderByInfo<MockEntity>>())).Verifiable();
             mockSortVisitor.Setup(o => o.Visit(It.IsAny<ThenByInfo<MockEntity>>())).Verifiable();
 
-            mockCursorVisitor.Setup(m => m.Index).Returns(0);
+            // mockCursorVisitor.Setup(m => m.Index).Returns(0);
             mockCursorVisitor.Setup(m => m.Parameter).Returns(parameterExpression);
             mockCursorVisitor.Setup(m => m.Visit(It.IsAny<OrderByInfo<MockEntity>>())).Verifiable();
             mockCursorVisitor.Setup(m => m.Visit(It.IsAny<ThenByInfo<MockEntity>>())).Verifiable();
