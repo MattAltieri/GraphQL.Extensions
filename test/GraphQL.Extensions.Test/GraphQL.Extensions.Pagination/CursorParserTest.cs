@@ -132,7 +132,7 @@ namespace GraphQL.Extensions.Pagination {
         public void Should_CorrectlyFilterData_When_ApplyingCursorPredicate(
             string cursorValue,
             CursorFilterTypes cursorFilterType,
-            Dictionary<string, SortDirections> orderByData,
+            OrderByInfo<MockEntity> orderBy,
             IOrderedQueryable<MockEntity> testData,
             IOrderedQueryable<MockEntity> expectedData) {
 #pragma warning restore xUnit1026
@@ -141,41 +141,16 @@ namespace GraphQL.Extensions.Pagination {
             Exception exception = Record.Exception(() => sorter = new SortVisitor<MockEntity>(testData, parameterExpression));
             exception.ShouldBeNull();
             sorter.ShouldNotBeNull();
-
-            var orderByArray = orderByData
-                .Select(o => new {
-                    ColumnName = o.Key,
-                    SortDirection = o.Value
-                });
-
-            OrderByInfoBase<MockEntity> orderBy = null;            
-            for (int i = orderByArray.Count() - 1; i >= 0;i--) {
-                if (i == 0) {
-                    orderBy = TestHelpers.MakeOrderByInfo<MockEntity>(
-                        parameterExpression,
-                        orderByArray.ElementAt(i).ColumnName,
-                        orderByArray.ElementAt(i).SortDirection,
-                        (ThenByInfo<MockEntity>)orderBy,
-                        sortVisitor: sorter);
-                } else {
-                    orderBy = TestHelpers.MakeThenByInfo<MockEntity>(
-                        parameterExpression,
-                        orderByArray.ElementAt(i).ColumnName,
-                        orderByArray.ElementAt(i).SortDirection,
-                        (ThenByInfo<MockEntity>)orderBy,
-                        sortVisitor: sorter);
-                }
-            }
             
             CursorParser<MockEntity> systemUnderTest = null;
             exception = Record.Exception(() =>
                 systemUnderTest = new CursorParser<MockEntity>(cursorValue, cursorFilterType, cursorSegmentDelimiter, cursorSubsegmentDelimiter,
-                (OrderByInfo<MockEntity>)orderBy));
+                orderBy));
             exception.ShouldBeNull();
             systemUnderTest.ShouldNotBeNull();
 
             IOrderedQueryable<MockEntity> sortedTestData = null;
-            exception = Record.Exception(() => sortedTestData = sorter.Visit((OrderByInfo<MockEntity>)orderBy));
+            exception = Record.Exception(() => sortedTestData = sorter.Visit(orderBy));
             exception.ShouldBeNull();
             sortedTestData.ShouldNotBeNull();
 
@@ -2790,9 +2765,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -2801,9 +2774,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::1",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -2812,9 +2783,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -2823,9 +2792,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -2834,9 +2801,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -2845,9 +2810,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -2856,9 +2819,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -2866,9 +2827,8 @@ namespace GraphQL.Extensions.Pagination {
                 },
                 new object[] {
                     "name::d::B",
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending }
-                    },
+                    CursorFilterTypes.Before,
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -2877,9 +2837,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -2888,9 +2846,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -2899,9 +2855,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -2910,9 +2864,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -2921,9 +2873,7 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending),
                     TestHelpers.TestData_SingleSort.AsQueryable(),
                     TestHelpers.TestData_SingleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -2936,10 +2886,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -2950,10 +2898,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -2964,10 +2910,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -2978,10 +2922,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -2992,10 +2934,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3006,10 +2946,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3020,10 +2958,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3034,10 +2970,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3048,10 +2982,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3062,10 +2994,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3076,10 +3006,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3090,10 +3018,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3104,10 +3030,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3118,10 +3042,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3132,10 +3054,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3146,10 +3066,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3160,10 +3078,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3174,10 +3090,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3188,10 +3102,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3202,10 +3114,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3216,10 +3126,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3230,10 +3138,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3244,10 +3150,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3258,10 +3162,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3272,10 +3174,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//id::a::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3286,10 +3186,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//id::a::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3300,10 +3198,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//id::a::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3314,10 +3210,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//id::a::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3328,10 +3222,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//id::d::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3342,10 +3234,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::a::B//id::d::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Ascending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.Name)
@@ -3356,10 +3246,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//id::d::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3370,10 +3258,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "name::d::B//id::d::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Name", SortDirections.Descending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.Name)
@@ -3384,10 +3270,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//id::a::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3398,10 +3282,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//id::a::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3412,10 +3294,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//id::a::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3426,10 +3306,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//id::a::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Id", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3440,10 +3318,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//id::d::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3454,10 +3330,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//id::d::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3468,10 +3342,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//id::d::2",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3482,10 +3354,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//id::d::2",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Id", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Id", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3496,10 +3366,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//name::a::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3510,10 +3378,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//name::a::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3524,10 +3390,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//name::a::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3538,10 +3402,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//name::a::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3552,10 +3414,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//name::d::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3566,10 +3426,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::a::625225824000000000//name::d::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderBy(o => o.DOB)
@@ -3580,10 +3438,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//name::d::B",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3594,10 +3450,8 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "dob::d::625225824000000000//name::d::B",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "DOB", SortDirections.Descending },
-                        { "Name", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("DOB", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending)),
                     TestHelpers.TestData_DoubleSort.AsQueryable(),
                     TestHelpers.TestData_DoubleSort.AsQueryable()
                         .OrderByDescending(o => o.DOB)
@@ -3612,11 +3466,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3629,11 +3481,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3646,11 +3496,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3663,11 +3511,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3680,11 +3526,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3697,11 +3541,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3714,11 +3556,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3731,11 +3571,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3748,11 +3586,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3765,11 +3601,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B//dob::a::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Ascending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Ascending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3782,11 +3616,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3799,11 +3631,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::a::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Ascending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3816,11 +3646,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3833,11 +3661,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::a::2//name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Ascending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Ascending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderBy(o => o.Id)
@@ -3850,11 +3676,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.After,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
@@ -3867,11 +3691,9 @@ namespace GraphQL.Extensions.Pagination {
                 new object[] {
                     "id::d::2//name::d::B//dob::d::625225824000000000",
                     CursorFilterTypes.Before,
-                    new Dictionary<string, SortDirections> {
-                        { "Id", SortDirections.Descending },
-                        { "Name", SortDirections.Descending },
-                        { "DOB", SortDirections.Descending }
-                    },
+                    new OrderByInfo<MockEntity>("Id", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("Name", SortDirections.Descending,
+                        new ThenByInfo<MockEntity>("DOB", SortDirections.Descending))),
                     TestHelpers.TestData_TripleSort.AsQueryable(),
                     TestHelpers.TestData_TripleSort.AsQueryable()
                         .OrderByDescending(o => o.Id)
