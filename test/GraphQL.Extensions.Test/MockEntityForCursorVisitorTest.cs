@@ -21,5 +21,9 @@ namespace GraphQL.Extensions.Test
         public DateTime DateTime { get; set; }
         public DateTime? DateTimeNull { get; set; }
         public string String { get; set; }
+
+
+
+        public string Cursor { get; set; }
     }
 }

@@ -14,9 +14,9 @@ namespace GraphQL.Extensions.Pagination {
         public virtual ParameterExpression Parameter { get; protected set; }
         public virtual string CursorSegmentDelimiter { get; protected set; }
         public virtual string CursorSubsegmentDelimiter { get; protected set; }
-        // public virtual int Index { get; protected set; }
+        public virtual int Index { get; protected set; }
 
-        // public CursorVisitor() => Index = 0;
+        public CursorVisitor() => Index = 0;
 
         public CursorVisitor(CursorVisitor<TSource, TResult> visitor)
             /* : this() */  {
@@ -40,15 +40,14 @@ namespace GraphQL.Extensions.Pagination {
             MemberExpression memberExpression = orderBy.GetMemberExpression(Parameter);
             
             Cursor cursor = new Cursor();
-            // cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{orderBy.SortDirection.ToString()}:{type.Name}");
             cursor.CursorFormatString.Append(orderBy.SortDirection == SortDirections.Ascending ? "a" : "d");
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append(orderBy.ColumnName.ToLower().ToString());
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
-            cursor.CursorFormatString.Append("{0}");
+            cursor.CursorFormatString.Append($"{{{Index.ToString()}}}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
-            // Index++;
+            Index++;
 
             if (orderBy.ThenBy != null) {
                 Cursor thenByCursor = orderBy.ThenBy.Accept<TResult>(this);
@@ -66,15 +65,14 @@ namespace GraphQL.Extensions.Pagination {
             MemberExpression memberExpression = thenBy.GetMemberExpression(Parameter);
 
             Cursor cursor = new Cursor();
-            // cursor.CursorFormatString.Append($"{{{Index.ToString()}}}:{thenBy.SortDirection.ToString()}");
             cursor.CursorFormatString.Append(thenBy.SortDirection == SortDirections.Ascending ? "a" : "d");
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
             cursor.CursorFormatString.Append(thenBy.ColumnName.ToLower().ToString());
             cursor.CursorFormatString.Append(CursorSubsegmentDelimiter);
-            cursor.CursorFormatString.Append("{0}");
+            cursor.CursorFormatString.Append($"{{{Index.ToString()}}}");
             cursor.CursorExpressions.Add(GetCursorPart(type, memberExpression));
 
-            // Index++;
+            Index++;
 
             if (thenBy.ThenBy != null) {
                 Cursor thenByCursor = thenBy.ThenBy.Accept<TResult>(this);

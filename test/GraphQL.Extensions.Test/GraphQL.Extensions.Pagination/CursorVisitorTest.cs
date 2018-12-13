@@ -1,3 +1,4 @@
+using Linq.Expressions.Compare;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -11,6 +12,46 @@ namespace GraphQL.Extensions.Pagination {
         private static ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntityForCursorVisitorTest), "f");
         private static string cursorSegmentDelimiter = "//";
         private static string cursorSubsegmentDelimiter = "::";
+
+        private static MockEntityForCursorVisitorTest testObject1 = new MockEntityForCursorVisitorTest {
+            Char = 'A',
+            CharNull = null,
+            Short = 5,
+            ShortNull = null,
+            Int = 10,
+            IntNull = null,
+            Long = 15,
+            LongNull = null,
+            Decimal = 20.01M,
+            DecimalNull = null,
+            Float = 25.01F,
+            FloatNull = null,
+            Double = 30.01,
+            DoubleNull = null,
+            DateTime = DateTime.Now,
+            DateTimeNull = null,
+            String = null,
+        };
+
+        private static MockEntityForCursorVisitorTest testObject2 = new MockEntityForCursorVisitorTest {
+            Char = 'A',
+            CharNull = 'A',
+            Short = 5,
+            ShortNull = 5,
+            Int = 10,
+            IntNull = 10,
+            Long = 15,
+            LongNull = 15,
+            Decimal = 20.01M,
+            DecimalNull = 20.01M,
+            Float = 25.01F,
+            FloatNull = 25.01F,
+            Double = 30.01,
+            DoubleNull = 30.01,
+            DateTime = DateTime.Now,
+            DateTimeNull = DateTime.Now,
+            String = "abc",
+        };
 
         private static TestCursorVisitor systemUnderTest = new TestCursorVisitor(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
 
@@ -178,6 +219,28 @@ namespace GraphQL.Extensions.Pagination {
                 result.ShouldNotBeNull();
 
             result.ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetVisitorTestData_Single_Nulls))]
+        public void Should_GenerateCorrectCursor_When_VisitCalled(OrderByInfo<MockEntityForCursorVisitorTest> orderBy,
+            MockEntityForCursorVisitorTest testData, Cursor expectedResult) {
+            
+            ExpressionTreeComparer comparer = new ExpressionTreeComparer();
+            
+            Cursor result = null;
+            Exception exception = Record.Exception(() => result = systemUnderTest.Visit(orderBy));
+            exception.ShouldBeNull();
+            result.ShouldNotBeNull();
+
+            result.CursorFormatString.ToString().ShouldBe(expectedResult.CursorFormatString.ToString());
+            
+            int i = 0;
+            foreach (var item in result.CursorExpressions)
+            {
+                comparer.Equals(item, expectedResult.CursorExpressions[i]).ShouldBeTrue();
+                i++;
+            }
         }
 
         public static List<object[]> GetPrimitiveCursorPartTestData
@@ -429,6 +492,23 @@ namespace GraphQL.Extensions.Pagination {
                         String = "abc",
                     },
                     "abc",
+                },
+            };
+
+        public static List<object[]> GetVisitorTestData_Single_Nulls
+            => new List<object[]> {
+                new object[] {
+                    new OrderByInfo<MockEntityForCursorVisitorTest>("Char", SortDirections.Ascending),
+                    testObject1,
+                    new Cursor {
+                        CursorFormatString = new System.Text.StringBuilder("char::a::{0}"),
+                        CursorExpressions = new List<Expression> {
+                            Expression.MakeMemberAccess(
+                                parameterExpression,
+                                typeof(MockEntityForCursorVisitorTest).GetMember("Char")[0]
+                            ),
+                        },
+                    },
                 },
             };
 
