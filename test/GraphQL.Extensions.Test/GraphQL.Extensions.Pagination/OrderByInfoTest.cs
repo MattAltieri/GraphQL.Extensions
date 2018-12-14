@@ -24,8 +24,8 @@ namespace GraphQL.Extensions.Pagination {
         }).AsQueryable();
         ParameterExpression parameterExpression = Expression.Parameter(typeof(MockEntity), "o");
         Mock<SortVisitor<MockEntity>> mockSortVisitor = new Mock<SortVisitor<MockEntity>>();
-        Mock<CursorVisitor<MockEntity, MockEntity>> mockCursorVisitor =
-            new Mock<CursorVisitor<MockEntity, MockEntity>>();
+        Mock<CursorVisitor<MockEntity>> mockCursorVisitor =
+            new Mock<CursorVisitor<MockEntity>>();
         OrderByInfo<MockEntity> systemUnderTest = new OrderByInfo<MockEntity> {
             ColumnName = "Id",
             SortDirection = SortDirections.Ascending

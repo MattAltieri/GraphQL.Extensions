@@ -7,9 +7,8 @@ using System.Text;
 using GraphQL.Extensions.Internal;
 
 namespace GraphQL.Extensions.Pagination {
-    public class CursorVisitor<TSource, TResult>
-        where TSource : class
-        where TResult : class, new() {
+    public class CursorVisitor<TSource>
+        where TSource : class {
         
         public virtual ParameterExpression Parameter { get; protected set; }
         public virtual string CursorSegmentDelimiter { get; protected set; }
@@ -18,7 +17,7 @@ namespace GraphQL.Extensions.Pagination {
 
         public CursorVisitor() { }
 
-        public CursorVisitor(CursorVisitor<TSource, TResult> visitor){
+        public CursorVisitor(CursorVisitor<TSource> visitor){
             
             Parameter = visitor.Parameter;
             CursorSegmentDelimiter = visitor.CursorSegmentDelimiter;
@@ -50,7 +49,7 @@ namespace GraphQL.Extensions.Pagination {
             Index++;
 
             if (orderBy.ThenBy != null) {
-                Cursor thenByCursor = orderBy.ThenBy.Accept<TResult>(this);
+                Cursor thenByCursor = orderBy.ThenBy.Accept(this);
                 cursor.CursorFormatString.Append(CursorSegmentDelimiter);
                 cursor.CursorFormatString.Append(thenByCursor.CursorFormatString);
                 cursor.CursorExpressions.AddRange(thenByCursor.CursorExpressions);
@@ -75,7 +74,7 @@ namespace GraphQL.Extensions.Pagination {
             Index++;
 
             if (thenBy.ThenBy != null) {
-                Cursor thenByCursor = thenBy.ThenBy.Accept<TResult>(this);
+                Cursor thenByCursor = thenBy.ThenBy.Accept(this);
                 cursor.CursorFormatString.Append(CursorSegmentDelimiter);
                 cursor.CursorFormatString.Append(thenByCursor.CursorFormatString);
                 cursor.CursorExpressions.AddRange(thenByCursor.CursorExpressions);

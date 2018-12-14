@@ -22,8 +22,7 @@ namespace GraphQL.Extensions.Pagination {
 
         public abstract IOrderedQueryable<TSource> Accept(SortVisitor<TSource> visitor);
 
-        public abstract Cursor Accept<TResult>(CursorVisitor<TSource, TResult> visitor)
-            where TResult : class, new();
+        public abstract Cursor Accept(CursorVisitor<TSource> visitor);
 
         public virtual MemberExpression GetMemberExpression(ParameterExpression param) {
             return Expression.MakeMemberAccess(param, GetMemberInfo());

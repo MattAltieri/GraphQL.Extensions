@@ -241,7 +241,7 @@ namespace GraphQL.Extensions.Pagination {
             public override IOrderedQueryable<MockEntity> Accept(SortVisitor<MockEntity> visitor)
                 => throw new NotImplementedException();
 
-            public override Cursor Accept<TResult>(CursorVisitor<MockEntity, TResult> visitor)
+            public override Cursor Accept(CursorVisitor<MockEntity> visitor)
                 => throw new NotImplementedException();
         }
     }

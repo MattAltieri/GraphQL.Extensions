@@ -9,15 +9,14 @@ using Moq;
 namespace GraphQL.Extensions.Test {
     public static class TestHelpers {
         
-        public static OrderByInfo<TSource> MakeOrderByInfo<TSource, TResult>(
+        public static OrderByInfo<TSource> MakeOrderByInfo<TSource>(
             ParameterExpression parameterExpression,
             string columnName,
             SortDirections sortDirection,
             ThenByInfo<TSource> thenBy = null,
             SortVisitor<TSource> sortVisitor = null,
-            CursorVisitor<TSource, TResult> cursorVisitor = null)
-            where TSource : class
-            where TResult : class, new() {
+            CursorVisitor<TSource> cursorVisitor = null)
+            where TSource : class {
 
             Mock<OrderByInfo<TSource>> mock = new Mock<OrderByInfo<TSource>>();
 
@@ -45,31 +44,20 @@ namespace GraphQL.Extensions.Test {
                     .Returns(() => sortVisitor.Visit(mock.Object));
 
             if (cursorVisitor != null)
-                mock.Setup(m => m.Accept(It.IsAny<CursorVisitor<TSource, TResult>>()))
+                mock.Setup(m => m.Accept(It.IsAny<CursorVisitor<TSource>>()))
                     .Returns(() => cursorVisitor.Visit(mock.Object));
 
             return mock.Object;
         }
 
-        public static OrderByInfo<TSource> MakeOrderByInfo<TSource>(
+        public static ThenByInfo<TSource> MakeThenByInfo<TSource>(
             ParameterExpression parameterExpression,
             string columnName,
             SortDirections sortDirection,
             ThenByInfo<TSource> thenBy = null,
             SortVisitor<TSource> sortVisitor = null,
-            CursorVisitor<TSource, TSource> cursorVisitor = null)
-            where TSource : class, new()
-            => MakeOrderByInfo<TSource, TSource>(parameterExpression, columnName, sortDirection, thenBy, sortVisitor, cursorVisitor);
-
-        public static ThenByInfo<TSource> MakeThenByInfo<TSource, TResult>(
-            ParameterExpression parameterExpression,
-            string columnName,
-            SortDirections sortDirection,
-            ThenByInfo<TSource> thenBy = null,
-            SortVisitor<TSource> sortVisitor = null,
-            CursorVisitor<TSource, TResult> cursorVisitor = null)
-            where TSource : class
-            where TResult : class, new() {
+            CursorVisitor<TSource> cursorVisitor = null)
+            where TSource : class {
             
             Mock<ThenByInfo<TSource>> mock = new Mock<ThenByInfo<TSource>>();
 
@@ -97,21 +85,11 @@ namespace GraphQL.Extensions.Test {
                     .Returns(() => sortVisitor.Visit(mock.Object));
 
             if (cursorVisitor != null)
-                mock.Setup(m => m.Accept(It.IsAny<CursorVisitor<TSource, TResult>>()))
+                mock.Setup(m => m.Accept(It.IsAny<CursorVisitor<TSource>>()))
                     .Returns(() => cursorVisitor.Visit(mock.Object));
 
             return mock.Object;
         }
-
-        public static ThenByInfo<TSource> MakeThenByInfo<TSource>(
-            ParameterExpression parameterExpression,
-            string columnName,
-            SortDirections sortDirection,
-            ThenByInfo<TSource> thenBy = null,
-            SortVisitor<TSource> sortVisitor = null,
-            CursorVisitor<TSource, TSource> cursorVisitor = null)
-            where TSource : class, new()
-            => MakeThenByInfo<TSource, TSource>(parameterExpression, columnName, sortDirection, thenBy, sortVisitor, cursorVisitor);
 
         public static List<MockEntity> TestData_SingleSort = new List<MockEntity> {
             new MockEntity {

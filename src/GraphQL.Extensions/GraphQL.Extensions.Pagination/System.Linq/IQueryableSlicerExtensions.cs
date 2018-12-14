@@ -1,67 +1,153 @@
-// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Linq.Expressions;
-// using System.Reflection;
-// using GraphQL.Extensions.Internal;
-// using GraphQL.Extensions.Pagination;
-// using GraphQL.Extensions.Pagination.Internal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using GraphQL.Extensions.Internal;
+using GraphQL.Extensions.Pagination;
 
-// namespace System.Linq{
-//     public static class IQueryableSlicerExtensions {
+namespace System.Linq{
+    public static class IQueryableSlicerExtensions {
 
-//         public static IQueryable<TResult> Slice<TSource, TResult>(this IQueryable<TSource> query, ISlicer slicer)
-//             where TSource : class
-//             where TResult : class, new()
-//             => Slice<TSource, TResult>(query, slicer, CursorInjector.Instance);
-
-//         internal static IQueryable<TResult> Slice<TSource, TResult>(IQueryable<TSource> query, ISlicer slicer, ICursorInjector cursorInjector)
-//             where TSource : class
-//             where TResult : class, new() {
+        private static void AssertSliceArguments<TSource>(
+            IQueryable<TSource> query,
+            SlicerBase<TSource> slicer,
+            string cursorSegmentDelimiter,
+            string cursorSubsegmentDelimiter)
+            where TSource : class {
             
-//             ParameterExpression param = (ParameterExpression)((MethodCallExpression)query.Expression).Arguments[0];
-//             Expression<Func<TSource, TResult>> selector =
-//                 (Expression<Func<TSource, TResult>>)((MethodCallExpression)query.Expression).Arguments[1];
+            if (query == null)
+                throw new ArgumentNullException($"'{nameof(query)}; must not be null.");
+            if (slicer == null)
+                throw new ArgumentNullException($"'{nameof(slicer)}' must not be null.");
+            if (slicer.OrderBy == null)
+                throw new ArgumentNullException($"'{nameof(slicer.OrderBy)}' must not be null.");
+            if (cursorSegmentDelimiter == string.Empty)
+                throw new ArgumentException($"'{nameof(cursorSegmentDelimiter)}' must not be an empty string");
+            if (cursorSubsegmentDelimiter == string.Empty)
+                throw new ArgumentException($"'{nameof(cursorSubsegmentDelimiter)}' must not be an empty string");
+        }
+
+        public static IOrderedQueryable<TSource> Slice<TSource>(
+            this IQueryable<TSource> query,
+            BeforeSlicer<TSource> slicer,
+            string cursorSegmentDelimiter = "//",
+            string cursorSubsegmentDelimiter = "::")
+            where TSource : class  {
+            
+            AssertSliceArguments<TSource>(query, slicer, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+            
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(TSource), "f");
+            
+            // Apply slicer's OrderBy clause
+            IOrderedQueryable<TSource> orderedQuery = (new SortVisitor<TSource>(query, parameterExpression)).Visit(slicer.OrderBy);
+
+            // Filter for previous page
+            if (!string.IsNullOrWhiteSpace(slicer.Before)) {
+                CursorVisitor<TSource> cursorVisitor =
+                    new CursorVisitor<TSource>(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+
+                Cursor cursor = cursorVisitor.Visit(slicer.OrderBy);
+                CursorParser<TSource> cursorParser = new CursorParser<TSource>(
+                    slicer.Before,
+                    CursorFilterTypes.Before,
+                    cursorSegmentDelimiter,
+                    cursorSubsegmentDelimiter,
+                    slicer.OrderBy
+                );
+
+                orderedQuery = (IOrderedQueryable<TSource>)orderedQuery.Where(cursorParser.GetFilterPredicate());
+            }
+
+            // Slice to a single page
+            if (slicer.First.HasValue)
+                orderedQuery = (IOrderedQueryable<TSource>)orderedQuery.Take(slicer.First.Value);
+
+            return orderedQuery;
+        }
+
+        public static IOrderedQueryable<TSource> Slice<TSource>(
+            this IQueryable<TSource> query,
+            AfterSlicer<TSource> slicer,
+            string cursorSegmentDelimiter = "//",
+            string cursorSubsegmentDelimiter = "::")
+            where TSource : class {
+            
+            AssertSliceArguments<TSource>(query, slicer, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(TSource), "f");
+            
+            // Apply slicer's OrderBy clause
+            IOrderedQueryable<TSource> orderedQuery = (new SortVisitor<TSource>(query, parameterExpression)).Visit(slicer.OrderBy);
+
+            // Filter for previous page
+            if (!string.IsNullOrWhiteSpace(slicer.After)) {
+                CursorVisitor<TSource> cursorVisitor =
+                    new CursorVisitor<TSource>(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+
+                Cursor cursor = cursorVisitor.Visit(slicer.OrderBy);
+                CursorParser<TSource> cursorParser = new CursorParser<TSource>(
+                    slicer.After,
+                    CursorFilterTypes.After,
+                    cursorSegmentDelimiter,
+                    cursorSubsegmentDelimiter,
+                    slicer.OrderBy
+                );
+
+                orderedQuery = (IOrderedQueryable<TSource>)orderedQuery.Where(cursorParser.GetFilterPredicate());
+            }
+
+            // Slice to a single page
+            if (slicer.First.HasValue)
+                orderedQuery = (IOrderedQueryable<TSource>)orderedQuery.Take(slicer.First.Value);
                 
-//             IQueryable<TSource> baseQuery = query.Provider.CreateQuery<TSource>(param);
+            return orderedQuery;
+        }
 
-//             // IQueryable<TResult> returnQuery = baseQuery.Select(SlicerDynamicParser.InjectCursorIntoSelector<TSource, TResult>(selector, slicer));
-//             IQueryable<TResult> returnQuery = baseQuery.Select(cursorInjector.InjectIntoSelector(selector, slicer));
+        public static IOrderedQueryable<TSource> Slice<TSource>(
+            this IQueryable<TSource> query,
+            Slicer<TSource> slicer,
+            string cursorSegmentDelimiter = "//",
+            string cursorSubsegmentDelimiter = "::")
+            where TSource : class {
+            
+            AssertSliceArguments<TSource>(query, slicer, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+            
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(TSource), "f");
+            
+            // Apply slicer's OrderBy clause
+            IOrderedQueryable<TSource> orderedQuery = (new SortVisitor<TSource>(query, parameterExpression)).Visit(slicer.OrderBy);
 
-//             int i = 0;
-//             foreach (string orderByEntry in slicer.OrderByEntries()) {
+            // Slice to a single page
+            if (slicer.First.HasValue)
+                orderedQuery = (IOrderedQueryable<TSource>)orderedQuery.Take(slicer.First.Value);
+                
+            return orderedQuery;
+        }
 
-//                 OrderByColumn orderByColumn = new OrderByColumn(orderByEntry, typeof(TResult), param);
-//                 Expression<Func<TResult>> columnExpression = Expression.Lambda<Func<TResult>>(orderByColumn.MemberExpression, param);
-
-//                 switch (orderByColumn.SortDirection) {
-//                     case SortDirections.Ascending:
-//                         if (i == 0) {
-//                             returnQuery = (IOrderedQueryable<TResult>)CachedReflection
-//                                 .OrderBy(typeof(TResult), orderByColumn.Type)
-//                                 .Invoke(null, new object[] { columnExpression });
-//                         } else {
-//                             returnQuery = (IOrderedQueryable<TResult>)CachedReflection
-//                                 .ThenBy(typeof(TResult), orderByColumn.Type)
-//                                 .Invoke(null, new object[] { columnExpression });
-//                         }
-//                         break;
-//                     case SortDirections.Descending:
-//                         if (i == 0) {
-//                             returnQuery = (IOrderedQueryable<TResult>)CachedReflection
-//                                 .OrderByDescending(typeof(TResult), orderByColumn.Type)
-//                                 .Invoke(null, new object[] { columnExpression });
-//                         } else {
-//                             returnQuery = (IOrderedQueryable<TResult>)CachedReflection
-//                                 .ThenByDescending(typeof(TResult), orderByColumn.Type)
-//                                 .Invoke(null, new object[] { columnExpression });
-//                         }
-//                         break;
-//                 }
-//                 i++;
-//             }
-
-//             return returnQuery;
-//         }
-//     }
-// }
+        public static IQueryable<TResult> InjectCursor<TSource, TResult>(
+            this IQueryable<TSource> query,
+            OrderByInfo<TSource> orderBy,
+            Expression<Func<TSource, TResult>> selector,
+            string cursorSegmentDelimiter = "//",
+            string cursorSubsegmentDelimiter = "::")
+            where TSource : class
+            where TResult : class, new() {
+            
+            if (query == null)
+                throw new ArgumentNullException($"'{nameof(query)}; must not be null.");
+            if (orderBy == null)
+                throw new ArgumentNullException($"'{nameof(orderBy)}' must not be null.");
+            if (selector == null)
+                throw new ArgumentNullException($"'{nameof(selector)}' must not be null.");
+            if (cursorSegmentDelimiter == string.Empty)
+                throw new ArgumentException($"'{nameof(cursorSegmentDelimiter)}' must not be an empty string");
+            if (cursorSubsegmentDelimiter == string.Empty)
+                throw new ArgumentException($"'{nameof(cursorSubsegmentDelimiter)}' must not be an empty string");
+            
+            CursorInjector<TSource, TResult> cursorInjector = new CursorInjector<TSource, TResult>(orderBy, cursorSegmentDelimiter,
+                cursorSubsegmentDelimiter);
+            return query.Select(cursorInjector.InjectIntoSelector(selector));
+        }
+    }
+}

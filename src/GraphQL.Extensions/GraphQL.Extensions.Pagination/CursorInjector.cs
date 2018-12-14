@@ -24,8 +24,8 @@ namespace GraphQL.Extensions.Pagination {
             ParameterExpression parameterExpression = originalSelector.Parameters[0];
             MemberInitExpression originalMemberInit = (MemberInitExpression)originalSelector.Body;
             
-            CursorVisitor<TSource, TResult> cursorVisitor =
-                new CursorVisitor<TSource, TResult>(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
+            CursorVisitor<TSource> cursorVisitor =
+                new CursorVisitor<TSource>(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter);
             Cursor cursor = cursorVisitor.Visit(OrderBy);
             
             List<MemberBinding> newMemberBindings = originalMemberInit.Bindings.ToList();

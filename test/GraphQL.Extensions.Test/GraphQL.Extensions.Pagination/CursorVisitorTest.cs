@@ -752,7 +752,7 @@ namespace GraphQL.Extensions.Pagination {
                 },
             };
 
-        private class TestCursorVisitor : CursorVisitor<MockEntityForCursorVisitorTest, MockEntityForCursorVisitorTest> {
+        private class TestCursorVisitor : CursorVisitor<MockEntityForCursorVisitorTest> {
 
             public TestCursorVisitor(ParameterExpression parameterExpression, string cursorSegmentDelimiter, string cursorSubsegmentDelimiter)
                 : base(parameterExpression, cursorSegmentDelimiter, cursorSubsegmentDelimiter) { }

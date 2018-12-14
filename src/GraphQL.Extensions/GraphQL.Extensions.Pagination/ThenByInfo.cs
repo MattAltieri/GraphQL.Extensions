@@ -34,7 +34,7 @@ namespace GraphQL.Extensions.Pagination {
         public override IOrderedQueryable<TSource> Accept(SortVisitor<TSource> visitor)
             => visitor.Visit(this);
 
-        public override Cursor Accept<TResult>(CursorVisitor<TSource, TResult> visitor)
+        public override Cursor Accept(CursorVisitor<TSource> visitor)
             => visitor.Visit(this);
 
         public override int GetHashCode()
