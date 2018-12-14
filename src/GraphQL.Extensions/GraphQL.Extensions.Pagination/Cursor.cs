@@ -24,7 +24,7 @@ namespace GraphQL.Extensions.Pagination {
             MethodCallExpression methodCall = Expression.Call(
                 CachedReflection.StringFormat(),
                 Expression.Constant(CursorFormatString.ToString()),
-                Expression.NewArrayInit(typeof(object), CursorExpressions.Select(e => Expression.Constant(e)))
+                Expression.NewArrayInit(typeof(object), CursorExpressions.Select(e => e))
             );
 
             return Expression.Bind(typeof(TSource).GetMember("Cursor")[0], methodCall);

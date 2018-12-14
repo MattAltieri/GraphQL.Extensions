@@ -16,6 +16,8 @@ namespace GraphQL.Extensions.Pagination {
         public virtual string CursorSubsegmentDelimiter { get; protected set; }
         public virtual int Index { get; protected set; }
 
+        public CursorVisitor() { }
+
         public CursorVisitor(CursorVisitor<TSource, TResult> visitor){
             
             Parameter = visitor.Parameter;
