@@ -712,6 +712,686 @@ namespace GraphQL.Extensions.Internal {
             result.Value.ShouldBeLessThan(0);
         }
 
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithChar() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(char)));
+            exception.ShouldBeNull();
+
+            IEnumerable<char> testData = new[] { 'a', 'b', 'c', 'A', 'B', 'C' };
+            char testItem = 'b';
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 'd';
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableChar() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(char?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<char?> testData = new[] { 'a', 'b', 'c', 'A', 'B', 'C', (char?)null };
+            char? testItem = 'b';
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 'd';
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            char testItemNonNull = 'b';
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithShort() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(short)));
+            exception.ShouldBeNull();
+
+            IEnumerable<short> testData = new short[] { 5, 10, 15, 20, 25, 30 };
+            short testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableShort() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(short?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<short?> testData = new short?[] { 5, 10, 15, 20, 25, 30, null };
+            short? testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            short testItemNonNull = 15;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithInt() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(int)));
+            exception.ShouldBeNull();
+
+            IEnumerable<int> testData = new[] { 5, 10, 15, 20, 25, 30 };
+            int testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableInt() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(int?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<int?> testData = new[] { 5, 10, 15, 20, 25, 30, (int?)null };
+            int? testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+            
+            int testItemNonNull = 15;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithLong() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(long)));
+            exception.ShouldBeNull();
+
+            IEnumerable<long> testData = new long[] { 5, 10, 15, 20, 25, 30 };
+            long testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableLong() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(long?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<long?> testData = new long?[] { 5, 10, 15, 20, 25, 30, null };
+            long? testItem = 15;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+            
+            long testItemNonNull = 15;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithDecimal() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(decimal)));
+            exception.ShouldBeNull();
+
+            IEnumerable<decimal> testData = new[] { 5M, 10M, 15M, 20M, 25M, 30M };
+            decimal testItem = 15M;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16M;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableDecimal() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(decimal?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<decimal?> testData = new decimal?[] { 5M, 10M, 15M, 20M, 25M, 30M, null };
+            decimal? testItem = 15M;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16M;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+            
+            decimal testItemNonNull = 15M;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithFloat() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(float)));
+            exception.ShouldBeNull();
+
+            IEnumerable<float> testData = new[] { 5F, 10F, 15F, 20F, 25F, 30F };
+            float testItem = 15F;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16F;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableFloat() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(float?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<float?> testData = new float?[] { 5F, 10F, 15F, 20F, 25F, 30F };
+            float? testItem = 15F;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16F;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+            
+            float testItemNonNull = 15F;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithDouble() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(double)));
+            exception.ShouldBeNull();
+
+            IEnumerable<double> testData = new[] { 5.0, 10.0, 15.0, 20.0, 25.0, 30.0 };
+            double testItem = 15.0;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16.0;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableDouble() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(double?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<double?> testData = new double?[] { 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, null };
+            double? testItem = 15.0;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = 16.0;
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+            
+            double testItemNonNull = 15.0;
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithString() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(string)));
+            exception.ShouldBeNull();
+
+            IEnumerable<string> testData = new[] { "aa", "bb", "cc", "aAa", "bBb", "cCc" };
+            string testItem = "bb";
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = "bbbb";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+
+            result.HasValue.ShouldBeTrue();
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithDateTime() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(DateTime)));
+            exception.ShouldBeNull();
+
+            IEnumerable<DateTime> testData = new[] { DateTime.Parse("2015-12-17"), DateTime.Parse("2016-12-17"), DateTime.Parse("2017-12-17") };
+            DateTime testItem = DateTime.Parse("2016-12-17");
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = DateTime.Parse("2016-01-24");
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+
+            result.HasValue.ShouldBeTrue();
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateIEnumerableContainsMethod_When_IEnumerableContainsCalledWithNullableDateTime() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.IEnumerableContains(typeof(DateTime?)));
+            exception.ShouldBeNull();
+
+            IEnumerable<DateTime?> testData = new DateTime?[] { DateTime.Parse("2015-12-17"), DateTime.Parse("2016-12-17"), DateTime.Parse("2017-12-17"), null };
+            DateTime? testItem = DateTime.Parse("2016-12-17");
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testItem = DateTime.Parse("2016-01-24");
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItem }));
+            exception.ShouldBeNull();
+
+            result.HasValue.ShouldBeTrue();
+            result.Value.ShouldBe(expectedResult);
+
+            DateTime testItemNonNull = DateTime.Parse("2016-12-17");
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData, testItemNonNull }));
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateStringContainsMethod_When_StringContainsCalled() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.StringContains());
+            exception.ShouldBeNull();
+
+            string testData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            string testPattern = "ipsum dol";
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testPattern = "abcdefg";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateStringContainsMethod_When_StringStartsWithCalled() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.StringStartsWith());
+            exception.ShouldBeNull();
+
+            string testData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            string testPattern = "Lorem ipsum dol";
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testPattern = "abcdefg";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateStringContainsMethod_When_StringEndsWithCalled() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.StringEndsWith());
+            exception.ShouldBeNull();
+
+            string testData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            string testPattern = "ore magna aliqua.";
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testPattern = "abcdefg";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(testData, new object[] { testPattern }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
+        [Fact]
+        public void Should_GenerateStringIsNullOrEmpty_When_StringIsNullOrEmptyCalled() {
+
+            Exception exception = Record.Exception(() => systemUnderTest_Method = CachedReflection.StringIsNullOrEmpty());
+            exception.ShouldBeNull();
+
+            string testData = null;
+            bool expectedResult = true;
+
+            bool? result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testData = "";
+            expectedResult = true;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testData = " ";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+
+            testData = "abc";
+            expectedResult = false;
+
+            result = null;
+            exception = Record.Exception(() => result = (bool)systemUnderTest_Method.Invoke(null, new object[] { testData }));
+            exception.ShouldBeNull();
+            result.HasValue.ShouldBeTrue();
+
+            result.Value.ShouldBe(expectedResult);
+        }
+
         public static List<object[]> GetOrderByTestData
             => new List<object[]> {
                 new object[] {

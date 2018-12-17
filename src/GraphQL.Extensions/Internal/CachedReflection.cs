@@ -194,6 +194,48 @@ namespace GraphQL.Extensions.Internal {
                     .Where(m => m.GetParameters()[0].ParameterType == typeof(char))
                     .First()));
 
+        private static MethodInfo s_IEnumerableContains;
+
+        public static MethodInfo IEnumerableContains(Type elementType)
+            => (s_IEnumerableContains ??
+               (s_IEnumerableContains =
+                    (from type in AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name == "System.Linq").GetTypes()
+                     where type.IsSealed
+                     && !type.IsGenericType
+                     && !type.IsNested
+                     from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                     where method.IsDefined(typeof(ExtensionAttribute), false)
+                     && method.Name == "Contains"
+                     && method.GetParameters().Count() == 2
+                     select method)
+                     .First().GetGenericMethodDefinition()))
+                     .MakeGenericMethod(elementType);
+
+        private static MethodInfo s_StringContains;
+
+        public static MethodInfo StringContains()
+            => (s_StringContains ??
+               (s_StringContains = typeof(string).GetMethod("Contains", new[] { typeof(string) })));
+
+        private static MethodInfo s_StringStartsWith;
+
+        public static MethodInfo StringStartsWith()
+            => (s_StringStartsWith ??
+               (s_StringStartsWith = typeof(string).GetMethod("StartsWith", new[] { typeof(string) })));
+
+        private static MethodInfo s_StringEndsWith;
+
+        public static MethodInfo StringEndsWith()
+            => (s_StringEndsWith ??
+               (s_StringEndsWith = typeof(string).GetMethod("EndsWith", new[] { typeof(string) })));
+
+        private static MethodInfo s_StringIsNullOrEmpty;
+
+        public static MethodInfo StringIsNullOrEmpty()
+            => (s_StringIsNullOrEmpty ??
+               (s_StringIsNullOrEmpty = typeof(string).GetMethod("IsNullOrEmpty", BindingFlags.Public | BindingFlags.Static,
+                    null, new[] { typeof(string) }, null)));
+
         private static IEnumerable<Type> PrimitiveTypes
             => new List<Type> {
                 typeof(char),
