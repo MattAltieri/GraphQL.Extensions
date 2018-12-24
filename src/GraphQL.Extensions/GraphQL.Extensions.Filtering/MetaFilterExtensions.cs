@@ -115,28 +115,28 @@ namespace GraphQL.Extensions.Filtering {
         }
 
         internal static Expression<Func<TSource, bool>> Compare<TSource, TMetaFilter>(TMetaFilter metaFilter, FilterOperators op,
-            string memberName, ParameterExpression param, MemberInfo filter)
+            string memberName, ParameterExpression param, MemberInfo filterMemberInfo)
             where TSource : class, new()
             where TMetaFilter : IMetaFilter<TMetaFilter> {
             
-            MemberTypes memberType = filter.MemberType;
+            MemberTypes memberType = filterMemberInfo.MemberType;
             Type filterType;
 
             object filterValue;
             if (memberType == MemberTypes.Property) {
-                filterValue = ((PropertyInfo)filter).GetValue(metaFilter);
-                filterType = ((PropertyInfo)filter).PropertyType;
+                filterValue = ((PropertyInfo)filterMemberInfo).GetValue(metaFilter);
+                filterType = ((PropertyInfo)filterMemberInfo).PropertyType;
             } else if (memberType == MemberTypes.Field) {
-                filterValue = ((FieldInfo)filter).GetValue(metaFilter);
-                filterType = ((FieldInfo)filter).FieldType;
+                filterValue = ((FieldInfo)filterMemberInfo).GetValue(metaFilter);
+                filterType = ((FieldInfo)filterMemberInfo).FieldType;
             } else
-                throw new ArgumentException($"{nameof(filter)} must be of type {nameof(PropertyInfo)} or {nameof(FieldInfo)}.");
+                throw new ArgumentException($"{nameof(filterMemberInfo)} must be of type {nameof(PropertyInfo)} or {nameof(FieldInfo)}.");
 
             MemberInfo memberInfo = typeof(TSource).GetMember(memberName).First();
             MemberExpression property = Expression.MakeMemberAccess(param, memberInfo);
 
             Expression expression = null;
-            ConstantExpression filterValueExpression = Expression.Constant(filterValue);
+            ConstantExpression filterValueExpression = Expression.Constant(filterValue, filterType);
 
             switch (op) {
                 case FilterOperators.Equal:
@@ -150,17 +150,6 @@ namespace GraphQL.Extensions.Filtering {
                 case FilterOperators.In:
                 case FilterOperators.NotIn:
                     MethodInfo listContainsMethod = CachedReflection.IEnumerableContains(filterType.GetElementType());
-                    //     (from type in AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name == "System.Linq").GetTypes()
-                    //      where type.IsSealed
-                    //      && !type.IsGenericType
-                    //      && !type.IsNested
-                    //      from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                    //      where method.IsDefined(typeof(ExtensionAttribute), false)
-                    //      && method.Name == "Contains"
-                    //      && method.GetParameters().Count() == 2
-                    //      select method)
-                    //      .First();
-                    // listContainsMethod = listContainsMethod.MakeGenericMethod(filterType.GetElementType());
 
                     expression = Expression.Call(null, listContainsMethod, filterValueExpression, property);
 
@@ -186,7 +175,6 @@ namespace GraphQL.Extensions.Filtering {
 
                 case FilterOperators.Contains:
                 case FilterOperators.NotContains:
-                    // MethodInfo containsMethod = filterType.GetMethod("Contains", new[] { filterType });
                     MethodInfo containsMethod = CachedReflection.StringContains();
                     expression = Expression.Call(property, containsMethod, filterValueExpression);
                     if (op == FilterOperators.NotContains)
@@ -195,7 +183,6 @@ namespace GraphQL.Extensions.Filtering {
 
                 case FilterOperators.StartsWith:
                 case FilterOperators.NotStartsWith:
-                    // MethodInfo startsWithMethod = filterType.GetMethod("StartsWith", new[] { filterType });
                     MethodInfo startsWithMethod = CachedReflection.StringStartsWith();
                     expression = Expression.Call(property, startsWithMethod, filterValueExpression);
                     if (op == FilterOperators.NotStartsWith)
@@ -204,7 +191,6 @@ namespace GraphQL.Extensions.Filtering {
 
                 case FilterOperators.EndsWith:
                 case FilterOperators.NotEndsWith:
-                    // MethodInfo endsWithMethod = filterType.GetMethod("EndsWith", new[] { filterType });
                     MethodInfo endsWithMethod = CachedReflection.StringEndsWith();
                     expression = Expression.Call(property, endsWithMethod, filterValueExpression);
                     if (op == FilterOperators.NotEndsWith)
@@ -236,8 +222,6 @@ namespace GraphQL.Extensions.Filtering {
                         notEmpty = true;
                     }
 
-                    // MethodInfo isEmptyMethod = filterType.GetMethod("IsNullOrEmpty", BindingFlags.Public | BindingFlags.Static,
-                    //     null, new[] { filterType }, null);
                     MethodInfo isEmptyMethod = CachedReflection.StringIsNullOrEmpty();
                     expression = Expression.Call(null, isEmptyMethod, property);
                     if (notEmpty)
@@ -246,6 +230,34 @@ namespace GraphQL.Extensions.Filtering {
             }
 
             return Expression.Lambda<Func<TSource, bool>>(expression, param);
+        }
+
+        internal static (Expression, Expression) HandleNullableComparison(Expression left, Expression right) {
+
+            Type underlyingLeft = Nullable.GetUnderlyingType(left.Type);
+            Type underlyingRight = Nullable.GetUnderlyingType(right.Type);
+            
+            /* If both types are not Nullable<T>, Expression.Equal and other binary operators works normally
+             * If both types are Nullable<T>, Expression.Equal will use a lifted operator.
+             *              * 
+             * An issue arrises when one type is Nullable<T> and the other is T. The operator cannot be lifted, so
+             * this condition must be tested for and the non-nullable expression
+             */
+
+            // If both left and right are nullable, -OR- neither is, return the expressions as-is
+            if (ReferenceEquals(underlyingLeft, underlyingRight)) {
+                
+                return (left, right);
+            } else { // otherwise, wrap whichever expression is non-nullable in a unary expression to cast it to nullable
+                Expression newLeft = underlyingLeft == null
+                    ? Expression.Convert(left, typeof(Nullable<>).MakeGenericType(left.Type))
+                    : left;
+                Expression newRight = underlyingRight == null
+                    ? Expression.Convert(right, typeof(Nullable<>).MakeGenericType(right.Type))
+                    : right;
+
+                return (newLeft, newRight);
+            }
         }
     }
 }
